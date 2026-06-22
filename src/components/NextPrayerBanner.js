@@ -16,12 +16,12 @@ const CARD_H = Math.round(CARD_W * 0.62); // ~62% of width → landscape 16:10 f
 
 // ── Prayer background images ──────────────────────────────────────────────────
 const PRAYER_IMAGES = {
-  Fajr:    require('../../assets/prayers/fajr.png'),
-  Sunrise: require('../../assets/prayers/sunrise.png'),
-  Dhuhr:   require('../../assets/prayers/dhuhr.png'),
-  Asr:     require('../../assets/prayers/asr.png'),
-  Maghrib: require('../../assets/prayers/maghrib.png'),
-  Isha:    require('../../assets/prayers/isha.png'),
+  Fajr:    require('../../assets/prayers/fajr.jpg'),
+  Sunrise: require('../../assets/prayers/sunrise.jpg'),
+  Dhuhr:   require('../../assets/prayers/dhuhr.jpg'),
+  Asr:     require('../../assets/prayers/asr.jpg'),
+  Maghrib: require('../../assets/prayers/maghrib.jpg'),
+  Isha:    require('../../assets/prayers/isha.jpg'),
 };
 
 const PRAYER_TINT = {
