@@ -220,7 +220,9 @@ function PageDots({ prayerName }) {
 export default function NextPrayerBanner({
   name,
   time,
+  endTime,
   countdown,
+  meta,
   hijriDate,
   gregorianDate,
   location,
@@ -293,10 +295,16 @@ export default function NextPrayerBanner({
             <View style={styles.arcInfoOverlay}>
               <Text style={styles.hijriDate}>{hijriDate}</Text>
               <Text style={styles.prayerName}>{name}</Text>
+              {meta?.arabic ? (
+                <Text style={styles.arabicName}>{meta.arabic}</Text>
+              ) : null}
               <Text style={styles.bigTime}>{time}</Text>
               <Text style={styles.countdown}>
                 will start in {naturalCountdown(countdown)}
               </Text>
+              {endTime ? (
+                <Text style={styles.endTime}>ends at {endTime}</Text>
+              ) : null}
             </View>
 
           </View>
@@ -394,6 +402,15 @@ const styles = StyleSheet.create({
     marginBottom:  1,
   },
 
+  // Arabic name
+  arabicName: {
+    color:         'rgba(255,255,255,0.70)',
+    fontSize:      16,
+    fontWeight:    '600',
+    letterSpacing: 0.5,
+    marginBottom:  2,
+  },
+
   // Big time
   bigTime: {
     color:            '#fff',
@@ -412,6 +429,14 @@ const styles = StyleSheet.create({
     color:         'rgba(255,255,255,0.75)',
     fontSize:      12,
     letterSpacing: 0.2,
+  },
+
+  // End time
+  endTime: {
+    color:         'rgba(255,255,255,0.50)',
+    fontSize:      11,
+    letterSpacing: 0.2,
+    marginTop:     2,
   },
 
   // Page dots

@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const PRAYERS_PREFIX    = 'prayers_';
-const COMPLETE_DAYS_KEY = 'complete_days';
+const PRAYERS_PREFIX       = 'prayers_';
+const COMPLETE_DAYS_KEY    = 'complete_days';
+const NOTIFICATIONS_KEY    = 'notifications_enabled';
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
 
@@ -121,7 +122,26 @@ export const getStreakData = async () => {
   };
 };
 
-// ─── Weekly calendar data ─────────────────────────────────────────────────────
+// ─── Notification preference ──────────────────────────────────────────────────
+
+/** Returns true if notifications are enabled (default: true). */
+export const getNotificationsEnabled = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(NOTIFICATIONS_KEY);
+    return raw === null ? true : JSON.parse(raw);
+  } catch {
+    return true;
+  }
+};
+
+/** Persists the user's notification preference. */
+export const setNotificationsEnabled = async (enabled) => {
+  try {
+    await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(enabled));
+  } catch {
+    // ignore
+  }
+};
 
 /**
  * Returns an array of 7 objects (Mon-today) each with:

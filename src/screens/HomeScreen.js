@@ -10,7 +10,7 @@ import {
   calculatePrayerTimes, formatTime, getCountdown,
   getNextPrayer, getTomorrowFajr, ALL_PRAYERS, TRACKABLE_PRAYERS, PRAYER_META,
 } from '../utils/prayerTimes';
-import { getCompletedPrayers, togglePrayer } from '../utils/storage';
+import { getCompletedPrayers, togglePrayer, getNotificationsEnabled } from '../utils/storage';
 import {
   requestNotificationPermission,
   schedulePrayerNotifications,
@@ -73,6 +73,7 @@ export default function HomeScreen() {
   const [nextPrayer,       setNextPrayer]       = useState(null);
   const [countdown,        setCountdown]        = useState('--:--:--');
   const [tomorrowFajr,     setTomorrowFajr]     = useState(null);
+  const [locationName,     setLocationName]     = useState(null);
 
   const timesRef  = useRef(null);
   const coordsRef = useRef(null);
@@ -95,8 +96,25 @@ export default function HomeScreen() {
       timesRef.current = times;
       setTomorrowFajr(getTomorrowFajr(loc.coords.latitude, loc.coords.longitude));
 
-      const granted = await requestNotificationPermission();
-      if (granted) await schedulePrayerNotifications(times);
+      // Reverse geocode to get a human-readable city name
+      try {
+        const [place] = await Location.reverseGeocodeAsync({
+          latitude:  loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        });
+        if (place) {
+          const city = place.city || place.subregion || place.region || place.country;
+          setLocationName(city || null);
+        }
+      } catch {
+        // Non-critical — banner falls back to 'Local'
+      }
+
+      const notificationsOn = await getNotificationsEnabled();
+      if (notificationsOn) {
+        const granted = await requestNotificationPermission();
+        if (granted) await schedulePrayerNotifications(times);
+      }
 
       const completed = await getCompletedPrayers();
       setCompletedPrayers(completed);
@@ -190,6 +208,7 @@ export default function HomeScreen() {
             onLocationPress={load}
             hijriDate={hijriDate}
             gregorianDate={shortDate}
+            location={locationName}
             fajrTime={prayerTimes?.Fajr}
             maghribTime={prayerTimes?.Maghrib}
             nextFajrTime={tomorrowFajr}
