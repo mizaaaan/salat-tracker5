@@ -5,12 +5,12 @@ export const TRACKABLE_PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 export const ALL_PRAYERS       = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
 export const PRAYER_META = {
-  Fajr:    { icon: '🌅', arabic: 'الفجر',   color: '#7B8CDE' },
-  Sunrise: { icon: '🌄', arabic: 'الشروق',  color: '#F9A825' },
-  Dhuhr:   { icon: '☀️', arabic: 'الظهر',   color: '#FFD600' },
-  Asr:     { icon: '🌤️', arabic: 'العصر',  color: '#FF8F00' },
-  Maghrib: { icon: '🌇', arabic: 'المغرب',  color: '#FF7043' },
-  Isha:    { icon: '🌙', arabic: 'العشاء',  color: '#5C6BC0' },
+  Fajr:    { icon: '🌅', image: require('../../assets/prayers/fajr.png'),    arabic: 'الفجر',   color: '#7B8CDE' },
+  Sunrise: { icon: '🌄', image: require('../../assets/prayers/sunrise.png'), arabic: 'الشروق',  color: '#F9A825' },
+  Dhuhr:   { icon: '☀️', image: require('../../assets/prayers/dhuhr.png'),   arabic: 'الظهر',   color: '#FFD600' },
+  Asr:     { icon: '🌤️', image: require('../../assets/prayers/asr.png'),    arabic: 'العصر',   color: '#FF8F00' },
+  Maghrib: { icon: '🌇', image: require('../../assets/prayers/maghrib.png'), arabic: 'المغرب',  color: '#FF7043' },
+  Isha:    { icon: '🌙', image: require('../../assets/prayers/isha.png'),    arabic: 'العشاء',  color: '#5C6BC0' },
 };
 
 /**

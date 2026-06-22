@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, Animated,
+  View, Text, TouchableOpacity, StyleSheet, Animated, Image,
 } from 'react-native';
 import { useTheme } from '../constants/ThemeContext';
 
@@ -93,9 +93,13 @@ export default function PrayerCard({
         {/* ── Content row ── */}
         <View style={styles.row}>
 
-          {/* Icon — single clean container, no layered glow */}
+          {/* Icon — prayer image */}
           <View style={[styles.iconBox, { backgroundColor: meta.color + '20', borderColor: meta.color + '30' }]}>
-            <Text style={styles.iconEmoji}>{meta.icon}</Text>
+            {meta.image ? (
+              <Image source={meta.image} style={styles.iconImage} resizeMode="cover" />
+            ) : (
+              <Text style={styles.iconEmoji}>{meta.icon}</Text>
+            )}
           </View>
 
           {/* Name + Arabic */}
@@ -198,6 +202,11 @@ const styles = StyleSheet.create({
   iconEmoji: {
     fontSize: 22,
     lineHeight: 26,
+  },
+  iconImage: {
+    width:        40,
+    height:       40,
+    borderRadius: 10,
   },
 
   // Text
