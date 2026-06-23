@@ -349,7 +349,6 @@ export default function NextPrayerBanner({
               {meta?.arabic ? (
                 <Text style={styles.arabicName}>{meta.arabic}</Text>
               ) : null}
-              <Text style={styles.bigTime}>{time}</Text>
               {/* Live countdown — auto-switches prayer period every second */}
               {live ? (
                 <View style={styles.liveBlock}>
@@ -514,14 +513,14 @@ const styles = StyleSheet.create({
     marginBottom:  2,
   },
   liveTicker: {
-    color:            '#FFD700',
-    fontSize:         22,
-    fontWeight:       '800',
-    letterSpacing:    2.5,
+    color:            '#FFFFFF',
+    fontSize:         28,
+    fontWeight:       '700',
+    letterSpacing:    1,
     fontVariant:      ['tabular-nums'],
-    textShadowColor:  'rgba(255,215,0,0.50)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    textShadowColor:  'rgba(0,0,0,0.40)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   // Legacy — kept for safety
   endCountdownRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: 2 },
