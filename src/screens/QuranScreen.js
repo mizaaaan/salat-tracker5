@@ -31,10 +31,7 @@ const fetchSurah = (n) =>
   fetch(`${BASE}/surah/${n}/editions/quran-uthmani,en.sahih,bn.bengali`)
     .then(r => r.json());
 
-// ── Bismillah ──────────────────────────────────────────────────────────────────
-const BISMILLAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
-// Surah 9 (At-Tawbah) has no Bismillah; Surah 27 has it inside verse 30, not at start
-const NO_BISMILLAH = new Set([9]);
+
 
 // ── Surah List Item ────────────────────────────────────────────────────────────
 const SurahRow = React.memo(({ item, onPress, Colors }) => {
@@ -339,14 +336,7 @@ export default function QuranScreen() {
                 </Text>
               </View>
 
-              {/* Bismillah */}
-              {!NO_BISMILLAH.has(selected?.number) && (
-                <View style={styles.bismillahWrap}>
-                  <Text style={[styles.bismillah, { color: Colors.primary }]}>
-                    {BISMILLAH}
-                  </Text>
-                </View>
-              )}
+
             </View>
           }
           showsVerticalScrollIndicator={false}
@@ -535,20 +525,7 @@ const getStyles = (Colors) => StyleSheet.create({
     backgroundColor: Colors.textMuted,
   },
 
-  // Bismillah
-  bismillahWrap: {
-    alignItems:   'center',
-    marginTop:    20,
-    marginBottom: 8,
-    paddingHorizontal: 24,
-  },
-  bismillah: {
-    fontSize:      22,
-    fontWeight:    '600',
-    textAlign:     'center',
-    letterSpacing: 1,
-    lineHeight:    36,
-  },
+
 });
 
 // ── Row styles (SurahRow) ──────────────────────────────────────────────────────
