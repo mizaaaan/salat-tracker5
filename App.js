@@ -1,8 +1,8 @@
 import React from 'react';
 import { Image, Platform } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 
@@ -21,7 +21,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const Tab = createMaterialTopTabNavigator();
+const Tab = createBottomTabNavigator();
 
 // Custom image icon component
 const TabIcon = ({ source, color }) => (
@@ -33,10 +33,6 @@ const TabIcon = ({ source, color }) => (
 
 function Navigation() {
   const { colors: Colors, isDark } = useTheme();
-  const insets = useSafeAreaInsets();
-
-  // Tab bar height: icon (24) + label (~14) + padding + home indicator safe area
-  const TAB_HEIGHT = 56 + insets.bottom;
 
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -54,21 +50,12 @@ function Navigation() {
     <NavigationContainer theme={navTheme}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <Tab.Navigator
-        tabBarPosition="bottom"
         screenOptions={{
-          // ── Swipe gestures ───────────────────────────────────────────────
-          swipeEnabled: true,
-          animationEnabled: true,
-          lazy: true,             // only render screen when first visited
-
-          // ── Tab bar appearance ───────────────────────────────────────────
+          headerShown: false,
           tabBarStyle: {
             backgroundColor:   Colors.card,
             borderTopColor:    Colors.border,
             borderTopWidth:    1,
-            height:            TAB_HEIGHT,
-            paddingBottom:     insets.bottom,   // home indicator gap on iPhone X+
-            paddingTop:        8,
             // Shadow (iOS)
             shadowColor:       '#000',
             shadowOffset:      { width: 0, height: -2 },
@@ -78,17 +65,12 @@ function Navigation() {
           },
           tabBarActiveTintColor:   Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
-          tabBarShowIcon:     true,
           tabBarShowLabel:    true,
           tabBarLabelStyle: {
             fontSize:      10,
             fontWeight:    '600',
             letterSpacing: 0.3,
-            marginTop:     2,
           },
-          // Hide the top indicator line (we're using this as a bottom tab)
-          tabBarIndicatorStyle: { height: 0, backgroundColor: 'transparent' },
-          tabBarPressColor: Colors.primary + '22',
         }}
       >
         <Tab.Screen
