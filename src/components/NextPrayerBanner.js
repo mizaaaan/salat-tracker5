@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Image, Dimensions,
+  Image, useWindowDimensions,
 } from 'react-native';
 import Svg, {
   Path, Circle, Rect,
   Defs, LinearGradient as SvgGradient, Stop,
 } from 'react-native-svg';
 import { PRAYER_META } from '../utils/prayerTimes';
-
-const { width: SCREEN_W } = Dimensions.get('window');
-
-// ── Landscape card dimensions ─────────────────────────────────────────────────
-const CARD_W = SCREEN_W - 32;           // full width minus small margins
 
 // ── Prayer background images ──────────────────────────────────────────────────
 const PRAYER_IMAGES = {
@@ -33,23 +28,28 @@ const PRAYER_TINT = {
   Isha:    'rgba(5,   5,  18, 0.38)',
 };
 
-// ── Arc geometry — ELLIPTICAL arc that fits inside the card ───────────────────
-const ARC_W   = CARD_W - 48;
-const LEFT_X  = 10;
-const RIGHT_X = ARC_W - 10;
+// ── Arc geometry — computed dynamically from screen width ────────────────────
+// Call useArcLayout() inside each component/render that needs these values.
+function computeArcLayout(screenW) {
+  const CARD_W  = screenW - 32;
+  const ARC_W   = CARD_W - 48;
+  const LEFT_X  = 10;
+  const RIGHT_X = ARC_W - 10;
+  const ARC_RX  = (RIGHT_X - LEFT_X) / 2;
+  const ARC_RY  = ARC_RX;                    // perfect semicircle
+  const ARC_CX  = (LEFT_X + RIGHT_X) / 2;
+  const BASE_Y  = ARC_RY + 8;
+  const ARC_H   = BASE_Y + 8;
+  const CARD_H  = ARC_H + 57;
 
-const ARC_RX  = (RIGHT_X - LEFT_X) / 2;   // horizontal radius
-const ARC_RY  = ARC_RX;                    // perfect semicircle: vertical = horizontal radius
-const ARC_CX  = (LEFT_X + RIGHT_X) / 2;
-const BASE_Y  = ARC_RY + 8;
-const ARC_H   = BASE_Y + 8;
-const CARD_H  = ARC_H + 57;
+  const arcPointAt = (t) => {
+    const theta = Math.PI * (1 - t);
+    const x = ARC_CX + ARC_RX * Math.cos(theta);
+    const y = BASE_Y - ARC_RY * Math.sin(theta);
+    return { x, y };
+  };
 
-function arcPointAt(t) {
-  const theta = Math.PI * (1 - t);
-  const x = ARC_CX + ARC_RX * Math.cos(theta);
-  const y = BASE_Y - ARC_RY * Math.sin(theta);
-  return { x, y };
+  return { CARD_W, ARC_W, LEFT_X, RIGHT_X, ARC_RX, ARC_RY, BASE_Y, ARC_H, CARD_H, arcPointAt };
 }
 
 // ── Day/night arc progress ─────────────────────────────────────────────────
@@ -174,7 +174,7 @@ function naturalCountdown(cd) {
 }
 
 // ── Gradient overlay ──────────────────────────────────────────────────────────
-function GradientOverlay() {
+function GradientOverlay({ CARD_W, CARD_H }) {
   return (
     <Svg
       style={StyleSheet.absoluteFill}
@@ -196,7 +196,7 @@ function GradientOverlay() {
 }
 
 // ── Flat ellipse arc + sun (day) / moon (night) ───────────────────────────────
-function CelestialArc({ isDay, t, moonPhase }) {
+function CelestialArc({ isDay, t, moonPhase, ARC_W, ARC_H, LEFT_X, BASE_Y, ARC_RX, ARC_RY, RIGHT_X, arcPointAt }) {
   const body = arcPointAt(t);
   // Large-arc=1, sweep=1 → correct upper ellipse arc
   const d = `M ${LEFT_X} ${BASE_Y} A ${ARC_RX} ${ARC_RY} 0 0 1 ${RIGHT_X} ${BASE_Y}`;
@@ -268,8 +268,13 @@ export default function NextPrayerBanner({
   maghribTime,
   nextFajrTime,
   onLocationPress,
-  allPrayerTimes,       // ← NEW: full { Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha } Date objects
+  allPrayerTimes,       // ← full { Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha } Date objects
 }) {
+  const { width: screenW } = useWindowDimensions();
+  // Recompute arc layout whenever screen width changes (rotation)
+  const layout = computeArcLayout(screenW);
+  const { CARD_W, ARC_W, LEFT_X, RIGHT_X, ARC_RX, ARC_RY, BASE_Y, ARC_H, CARD_H, arcPointAt } = layout;
+
   const locLabel = location || 'Local';
 
   const [arc, setArc] = useState(() => calcArcState(fajrTime, maghribTime, nextFajrTime));
@@ -301,7 +306,7 @@ export default function NextPrayerBanner({
 
   return (
     <View style={styles.shadow}>
-      <View style={styles.card}>
+      <View style={[styles.card, { height: CARD_H }]}>
 
         {/* Background image — landscape fill */}
         <Image
@@ -314,7 +319,7 @@ export default function NextPrayerBanner({
         <View style={[StyleSheet.absoluteFill, { backgroundColor: tint }]} />
 
         {/* Gradient */}
-        <GradientOverlay />
+        <GradientOverlay CARD_W={CARD_W} CARD_H={CARD_H} />
 
         {/* ══ CONTENT ══════════════════════════════════════════════════════ */}
         <View style={styles.overlay}>
@@ -340,7 +345,9 @@ export default function NextPrayerBanner({
 
             {/* Flat arc SVG */}
             <View style={styles.arcWrap}>
-              <CelestialArc isDay={arc.isDay} t={arc.t} moonPhase={moonPhase} />
+              <CelestialArc isDay={arc.isDay} t={arc.t} moonPhase={moonPhase}
+                ARC_W={ARC_W} ARC_H={ARC_H} LEFT_X={LEFT_X} BASE_Y={BASE_Y}
+                ARC_RX={ARC_RX} ARC_RY={ARC_RY} RIGHT_X={RIGHT_X} arcPointAt={arcPointAt} />
             </View>
 
             {/* Prayer info INSIDE the arc — absolutely positioned */}
@@ -395,7 +402,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     overflow:     'hidden',
-    height:       CARD_H,   // ← landscape height (62% of card width)
+    // height is set dynamically via inline style so it responds to rotation
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

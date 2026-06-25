@@ -1,20 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView,
-  ActivityIndicator, Animated,
+  View, Text, StyleSheet,
+  ActivityIndicator, Animated, useWindowDimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import Svg, { Circle, Line, G, Path, Text as SvgText } from 'react-native-svg';
 
 import { useTheme } from '../constants/ThemeContext';
 import { calculateQibla } from '../utils/prayerTimes';
 
-const SIZE   = 280;
-const CENTER = SIZE / 2;
-const RADIUS = 126;
+// Ticks are rendered with a computed SIZE passed in as props
 
-/** Build tick marks for the compass ring */
-const Ticks = ({ Colors }) => {
+const Ticks = ({ Colors, SIZE, CENTER, RADIUS }) => {
   const ticks = [];
   for (let i = 0; i < 72; i++) {
     const isMajor  = i % 9 === 0;
@@ -38,7 +36,14 @@ const Ticks = ({ Colors }) => {
 
 export default function QiblaScreen() {
   const { colors: Colors } = useTheme();
-  const styles = getStyles(Colors);
+  const { width, height } = useWindowDimensions();
+
+  // Responsive compass — scales down in landscape to fit the shorter height
+  const SIZE   = Math.min(260, Math.min(width, height) * 0.68);
+  const CENTER = SIZE / 2;
+  const RADIUS = SIZE * 0.45;
+
+  const styles = getStyles(Colors, SIZE);
 
   const [heading,    setHeading]    = useState(0);
   const [qibla,      setQibla]      = useState(null);
@@ -139,7 +144,7 @@ export default function QiblaScreen() {
         <Text style={styles.subtitle}>Point your phone to find Mecca</Text>
 
         {/* Compass */}
-        <View style={styles.compassShell}>
+        <View style={[styles.compassShell, { width: SIZE, height: SIZE, borderRadius: SIZE / 2 }]}>
           {/* Compass face */}
           <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
             {/* Background (stays still) */}
@@ -154,7 +159,7 @@ export default function QiblaScreen() {
                 real-world direction the top of the phone is pointing at —
                 exactly like the iOS Compass app. */}
             <G rotation={-heading} origin={`${CENTER}, ${CENTER}`}>
-              <Ticks Colors={Colors} />
+              <Ticks Colors={Colors} SIZE={SIZE} CENTER={CENTER} RADIUS={RADIUS} />
               <SvgText x={CENTER} y={20} textAnchor="middle"
                 fill={Colors.primary} fontSize="16" fontWeight="bold">N</SvgText>
               <SvgText x={SIZE - 14} y={CENTER + 5} textAnchor="middle"
@@ -170,7 +175,7 @@ export default function QiblaScreen() {
           <Animated.View
             style={[
               styles.needleWrapper,
-              { transform: [{ rotate: `${needleRotation}deg` }] },
+              { width: SIZE, height: SIZE, transform: [{ rotate: `${needleRotation}deg` }] },
             ]}
           >
             <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
@@ -222,7 +227,7 @@ export default function QiblaScreen() {
   );
 }
 
-const getStyles = (Colors) => StyleSheet.create({
+const getStyles = (Colors, SIZE = 280) => StyleSheet.create({
   container: {
     flex:            1,
     backgroundColor: Colors.background,
@@ -264,9 +269,6 @@ const getStyles = (Colors) => StyleSheet.create({
   },
   compassShell: {
     position: 'relative',
-    width:    SIZE,
-    height:   SIZE,
-    borderRadius: SIZE / 2,
     backgroundColor: Colors.background,
     shadowColor:   Colors.primary,
     shadowOffset:  { width: 0, height: 0 },
@@ -277,8 +279,6 @@ const getStyles = (Colors) => StyleSheet.create({
   needleWrapper: {
     position: 'absolute',
     top: 0, left: 0,
-    width:  SIZE,
-    height: SIZE,
   },
   infoRow: {
     flexDirection: 'row',

@@ -15,10 +15,11 @@ import React, {
   useState, useEffect, useCallback, useRef, useMemo,
 } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView,
+  View, Text, StyleSheet,
   FlatList, TouchableOpacity, TextInput,
   ActivityIndicator, ScrollView, Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../constants/ThemeContext';
 
 // ── Bismillah ──────────────────────────────────────────────────────────────────

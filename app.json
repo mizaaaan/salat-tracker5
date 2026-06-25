@@ -3,7 +3,7 @@
     "name": "SalatTracker",
     "slug": "salat-tracker",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -13,14 +13,15 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.salattracker.app",
       "buildNumber": "1",
       "infoPlist": {
         "CFBundleDisplayName": "Salat Tracker",
         "NSLocationWhenInUseUsageDescription": "Your location is used to calculate accurate prayer times and Qibla direction.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Your location is used to calculate accurate prayer times and Qibla direction.",
-        "UIBackgroundModes": ["fetch", "remote-notification"]
+        "UIBackgroundModes": ["fetch", "remote-notification"],
+        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait", "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight"]
       }
     },
     "android": {
