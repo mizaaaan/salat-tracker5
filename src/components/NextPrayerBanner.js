@@ -52,7 +52,9 @@ function computeArcLayout(screenW, screenH) {
   const ARC_CX  = (LEFT_X + RIGHT_X) / 2;
   const BASE_Y  = ARC_RY + 8;
   const ARC_H   = BASE_Y + 8;
-  const CARD_H  = ARC_H + 57;
+  // +82 gives enough room for topRow (~34px) + dots (~11px) + padding (~37px)
+  // Previously +57 caused page dots to be clipped by overflow:hidden.
+  const CARD_H  = ARC_H + 82;
 
   const arcPointAt = (t) => {
     const theta = Math.PI * (1 - t);
@@ -389,10 +391,10 @@ export default function NextPrayerBanner({
 
           </View>
 
-          {/* Page dots */}
+          {/* Page dots — moved up inside the arc area */}
           <PageDots prayerName={displayName} />
 
-          <View style={{ height: 10 }} />
+          <View style={{ height: 6 }} />
         </View>
 
       </View>
@@ -552,7 +554,7 @@ const styles = StyleSheet.create({
     flexDirection:  'row',
     gap:            5,
     justifyContent: 'center',
-    marginTop:      6,
+    marginTop:      -4,
   },
   dot:    { height: 5, borderRadius: 3 },
   dotOn:  { width: 18, backgroundColor: 'rgba(255,255,255,0.90)' },
