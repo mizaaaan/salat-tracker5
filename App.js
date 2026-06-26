@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, useWindowDimensions } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 
@@ -23,28 +23,17 @@ Notifications.setNotificationHandler({
 
 const Tab = createBottomTabNavigator();
 
-// Custom image icon — slightly larger in landscape
-const TabIcon = ({ source, color }) => {
-  const { width, height } = useWindowDimensions();
-  const size = width > height ? 26 : 24;
-  return (
-    <Image
-      source={source}
-      style={{ width: size, height: size, tintColor: color, resizeMode: 'contain' }}
-    />
-  );
-};
+const TabIcon = ({ source, color }) => (
+  <Image
+    source={source}
+    style={{ width: 26, height: 26, tintColor: color, resizeMode: 'contain' }}
+  />
+);
 
 function Navigation() {
   const { colors: Colors, isDark } = useTheme();
   const { width, height } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const isLandscape = width > height;
-
-  // Fixed tab bar height: icon area (50px) + bottom safe area inset.
-  // This replaces React Navigation's automatic inset logic which adds
-  // too much blank space on iPhones with a home indicator.
-  const TAB_H = 50 + insets.bottom;
 
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -68,14 +57,15 @@ function Navigation() {
             backgroundColor: Colors.card,
             borderTopColor:  Colors.border,
             borderTopWidth:  1,
-            height:          isLandscape ? 64 : TAB_H,
-            paddingBottom:   isLandscape ? 10 : insets.bottom + 4,
-            paddingTop:      6,
             shadowColor:     '#000',
             shadowOffset:    { width: 0, height: -2 },
             shadowOpacity:   0.06,
             shadowRadius:    6,
             elevation:       8,
+            // Portrait: NO height/padding overrides â let React Navigation +
+            // SafeAreaProvider handle safe area automatically (avoids double-inset).
+            // Landscape: explicit values because auto-shrinks too small to tap.
+            ...(isLandscape ? { height: 64, paddingBottom: 10, paddingTop: 5 } : {}),
           },
           tabBarActiveTintColor:   Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
