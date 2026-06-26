@@ -8,7 +8,8 @@ import * as Location from 'expo-location';
 import { useTheme } from '../constants/ThemeContext';
 import {
   calculatePrayerTimes, formatTime, getCountdown,
-  getNextPrayer, getTomorrowFajr, ALL_PRAYERS, TRACKABLE_PRAYERS, PRAYER_META,
+  getNextPrayer, getTomorrowFajr, getCurrentPrayer,
+  ALL_PRAYERS, TRACKABLE_PRAYERS, PRAYER_META,
 } from '../utils/prayerTimes';
 import { getCompletedPrayers, togglePrayer, getNotificationsEnabled } from '../utils/storage';
 import {
@@ -49,7 +50,7 @@ function getHijriDate(date = new Date()) {
 // ── End-time lookup: when does a given prayer period close? ──────────────────
 const PRAYER_END_KEY = {
   Fajr:    'Sunrise',
-  Sunrise: 'Dhuhr',
+  Sunrise: null,     // Sunrise is a single moment, not a period — no end time
   Dhuhr:   'Asr',
   Asr:     'Maghrib',
   Maghrib: 'Isha',
@@ -71,6 +72,7 @@ export default function HomeScreen() {
   const [loading,          setLoading]          = useState(true);
   const [error,            setError]            = useState(null);
   const [nextPrayer,       setNextPrayer]       = useState(null);
+  const [currentPrayer,    setCurrentPrayer]    = useState(null);
   const [countdown,        setCountdown]        = useState('--:--:--');
   const [tomorrowFajr,     setTomorrowFajr]     = useState(null);
   const [locationName,     setLocationName]     = useState(null);
@@ -132,12 +134,14 @@ export default function HomeScreen() {
     const tick = setInterval(() => {
       const times = timesRef.current;
       if (!times) return;
-      const next = getNextPrayer(times, coordsRef.current?.latitude, coordsRef.current?.longitude);
+      const next    = getNextPrayer(times, coordsRef.current?.latitude, coordsRef.current?.longitude);
+      const current = getCurrentPrayer(times, tomorrowFajr);
       setNextPrayer(next);
+      setCurrentPrayer(current);
       if (next) setCountdown(getCountdown(next.time));
     }, 1000);
     return () => clearInterval(tick);
-  }, []);
+  }, [tomorrowFajr]);
 
   // ── Toggle a prayer done / undone ──────────────────────────────────────────
   const handleToggle = async (prayer) => {
@@ -220,7 +224,13 @@ export default function HomeScreen() {
         <PrayerProgressBar
           prayers={TRACKABLE_PRAYERS}
           completed={completedPrayers}
-          nextPrayer={nextPrayer?.name}
+          activePrayer={
+            // Highlight the currently active trackable prayer.
+            // If current period is Sunrise (not trackable), fall back to nextPrayer.
+            currentPrayer && TRACKABLE_PRAYERS.includes(currentPrayer.name)
+              ? currentPrayer.name
+              : nextPrayer?.name
+          }
           prayerMeta={PRAYER_META}
         />
 
