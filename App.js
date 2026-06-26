@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Platform } from 'react-native';
+import { Image, useWindowDimensions } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -24,15 +24,21 @@ Notifications.setNotificationHandler({
 const Tab = createBottomTabNavigator();
 
 // Custom image icon component
-const TabIcon = ({ source, color }) => (
-  <Image
-    source={source}
-    style={{ width: 24, height: 24, tintColor: color, resizeMode: 'contain' }}
-  />
-);
+const TabIcon = ({ source, color }) => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  return (
+    <Image
+      source={source}
+      style={{ width: isLandscape ? 26 : 24, height: isLandscape ? 26 : 24, tintColor: color, resizeMode: 'contain' }}
+    />
+  );
+};
 
 function Navigation() {
   const { colors: Colors, isDark } = useTheme();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -46,6 +52,12 @@ function Navigation() {
     },
   };
 
+  // Only override height/padding in landscape â spreading nothing in portrait
+  // avoids passing `undefined` values that collapse the tab bar.
+  const landscapeTabBarStyle = isLandscape
+    ? { height: 64, paddingBottom: 10, paddingTop: 6 }
+    : {};
+
   return (
     <NavigationContainer theme={navTheme}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
@@ -53,19 +65,19 @@ function Navigation() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor:   Colors.card,
-            borderTopColor:    Colors.border,
-            borderTopWidth:    1,
-            // Shadow (iOS)
-            shadowColor:       '#000',
-            shadowOffset:      { width: 0, height: -2 },
-            shadowOpacity:     0.06,
-            shadowRadius:      6,
-            elevation:         8,
+            backgroundColor: Colors.card,
+            borderTopColor:  Colors.border,
+            borderTopWidth:  1,
+            shadowColor:     '#000',
+            shadowOffset:    { width: 0, height: -2 },
+            shadowOpacity:   0.06,
+            shadowRadius:    6,
+            elevation:       8,
+            ...landscapeTabBarStyle,
           },
           tabBarActiveTintColor:   Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
-          tabBarShowLabel:    true,
+          tabBarShowLabel:         true,
           tabBarLabelStyle: {
             fontSize:      10,
             fontWeight:    '600',
