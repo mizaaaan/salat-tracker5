@@ -23,10 +23,11 @@ Notifications.setNotificationHandler({
 
 const Tab = createBottomTabNavigator();
 
+// ── Unchanged from original — no useWindowDimensions here ────────────────────
 const TabIcon = ({ source, color }) => (
   <Image
     source={source}
-    style={{ width: 26, height: 26, tintColor: color, resizeMode: 'contain' }}
+    style={{ width: 24, height: 24, tintColor: color, resizeMode: 'contain' }}
   />
 );
 
@@ -62,14 +63,13 @@ function Navigation() {
             shadowOpacity:   0.06,
             shadowRadius:    6,
             elevation:       8,
-            // Portrait: NO height/padding overrides â let React Navigation +
-            // SafeAreaProvider handle safe area automatically (avoids double-inset).
-            // Landscape: explicit values because auto-shrinks too small to tap.
-            ...(isLandscape ? { height: 64, paddingBottom: 10, paddingTop: 5 } : {}),
+            // Portrait: zero overrides — SafeAreaProvider handles insets naturally.
+            // Landscape: explicit size because the bar auto-shrinks too small.
+            ...(isLandscape ? { height: 60, paddingBottom: 8, paddingTop: 4 } : {}),
           },
           tabBarActiveTintColor:   Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
-          tabBarShowLabel:         true,
+          tabBarShowLabel:  true,
           tabBarLabelStyle: {
             fontSize:      10,
             fontWeight:    '600',
@@ -77,51 +77,16 @@ function Navigation() {
           },
         }}
       >
-        <Tab.Screen
-          name="Prayer Times"
-          component={HomeScreen}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <TabIcon source={require('./assets/prayertime.png')} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Qibla"
-          component={QiblaScreen}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <TabIcon source={require('./assets/qibla.png')} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Tools"
-          component={ToolsScreen}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <TabIcon source={require('./assets/tools.png')} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Quran"
-          component={QuranScreen}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <TabIcon source={require('./assets/quran.png')} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Dua"
-          component={DuaScreen}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <TabIcon source={require('./assets/dua.png')} color={color} />
-            ),
-          }}
-        />
+        <Tab.Screen name="Prayer Times" component={HomeScreen}
+          options={{ tabBarIcon: ({ color }) => <TabIcon source={require('./assets/prayertime.png')} color={color} /> }} />
+        <Tab.Screen name="Qibla" component={QiblaScreen}
+          options={{ tabBarIcon: ({ color }) => <TabIcon source={require('./assets/qibla.png')} color={color} /> }} />
+        <Tab.Screen name="Tools" component={ToolsScreen}
+          options={{ tabBarIcon: ({ color }) => <TabIcon source={require('./assets/tools.png')} color={color} /> }} />
+        <Tab.Screen name="Quran" component={QuranScreen}
+          options={{ tabBarIcon: ({ color }) => <TabIcon source={require('./assets/quran.png')} color={color} /> }} />
+        <Tab.Screen name="Dua" component={DuaScreen}
+          options={{ tabBarIcon: ({ color }) => <TabIcon source={require('./assets/dua.png')} color={color} /> }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
