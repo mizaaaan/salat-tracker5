@@ -31,16 +31,24 @@ const PRAYER_TINT = {
 // ── Arc geometry — computed dynamically from screen width ────────────────────
 // Call useArcLayout() inside each component/render that needs these values.
 function computeArcLayout(screenW, screenH) {
-  const CARD_W  = screenW - 32;
-  const ARC_W   = CARD_W - 48;
+  const CARD_W      = screenW - 32;
+  const isLandscape = screenH && screenW > screenH;
+  // In landscape, cap arc width so it doesn't stretch into a flat ellipse.
+  // Portrait: ARC_W ≈ CARD_W - 48 (unchanged).
+  // Landscape: cap to screenH * 1.2 so RX stays proportional to RY.
+  const ARC_W   = isLandscape
+    ? Math.min(CARD_W - 48, screenH * 1.2)
+    : CARD_W - 48;
   const LEFT_X  = 10;
   const RIGHT_X = ARC_W - 10;
   const ARC_RX  = (RIGHT_X - LEFT_X) / 2;
-  // Cap ARC_RY so the banner never overflows in landscape rotation.
-  // In portrait ARC_RX ≈ 145 → ARC_RY = 145 (looks like semicircle).
-  // In landscape ARC_RX ≈ 370 → without cap card = 445 px, taller than screen.
-  const MAX_ARC_H = screenH ? Math.min(screenH * 0.28, 150) : 150;
-  const ARC_RY  = Math.min(ARC_RX, MAX_ARC_H); // flatten arc on wide screens
+  // Raise the height cap in landscape so the arc curves nicely.
+  // Portrait  → MAX_ARC_H ≈ 150 (same as before).
+  // Landscape → MAX_ARC_H up to 200, keeping card < 60 % of screenH.
+  const MAX_ARC_H = screenH
+    ? Math.min(screenH * 0.45, isLandscape ? 200 : 150)
+    : 150;
+  const ARC_RY  = Math.min(ARC_RX, MAX_ARC_H);
   const ARC_CX  = (LEFT_X + RIGHT_X) / 2;
   const BASE_Y  = ARC_RY + 8;
   const ARC_H   = BASE_Y + 8;
