@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Platform, useWindowDimensions } from 'react-native';
+import { Image, Platform } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -24,21 +24,15 @@ Notifications.setNotificationHandler({
 const Tab = createBottomTabNavigator();
 
 // Custom image icon component
-const TabIcon = ({ source, color }) => {
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-  return (
-    <Image
-      source={source}
-      style={{ width: isLandscape ? 26 : 24, height: isLandscape ? 26 : 24, tintColor: color, resizeMode: 'contain' }}
-    />
-  );
-};
+const TabIcon = ({ source, color }) => (
+  <Image
+    source={source}
+    style={{ width: 24, height: 24, tintColor: color, resizeMode: 'contain' }}
+  />
+);
 
 function Navigation() {
   const { colors: Colors, isDark } = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
 
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -62,9 +56,6 @@ function Navigation() {
             backgroundColor:   Colors.card,
             borderTopColor:    Colors.border,
             borderTopWidth:    1,
-            height:            isLandscape ? 64 : undefined,
-            paddingBottom:     isLandscape ? 10 : undefined,
-            paddingTop:        isLandscape ? 6  : undefined,
             // Shadow (iOS)
             shadowColor:       '#000',
             shadowOffset:      { width: 0, height: -2 },
@@ -76,12 +67,9 @@ function Navigation() {
           tabBarInactiveTintColor: Colors.textSecondary,
           tabBarShowLabel:    true,
           tabBarLabelStyle: {
-            fontSize:      isLandscape ? 11 : 10,
+            fontSize:      10,
             fontWeight:    '600',
             letterSpacing: 0.3,
-          },
-          tabBarIconStyle: {
-            marginTop: isLandscape ? 2 : 0,
           },
         }}
       >
