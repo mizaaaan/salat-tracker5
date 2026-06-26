@@ -14,7 +14,7 @@ import { useTheme } from '../constants/ThemeContext';
  *   nextPrayer   — name of the next upcoming prayer (gets a soft pulse)
  *   prayerMeta   — { [name]: { icon, image, color } }
  */
-export default function PrayerProgressBar({ prayers, completed, nextPrayer, prayerMeta }) {
+export default function PrayerProgressBar({ prayers, completed, activePrayer, prayerMeta }) {
   const { colors: Colors } = useTheme();
   const styles = getStyles(Colors);
 
@@ -102,7 +102,7 @@ export default function PrayerProgressBar({ prayers, completed, nextPrayer, pray
 
         {prayers.map((name) => {
           const isDone = completed.includes(name);
-          const isNext = !isDone && name === nextPrayer;
+          const isNext = !isDone && name === activePrayer;
           const meta   = prayerMeta[name] || {};
           const accent = meta.color || Colors.primary;
 
