@@ -3,16 +3,16 @@ import { Coordinates, CalculationMethod, PrayerTimes, Qibla } from 'adhan';
 // The 5 trackable prayers (Sunrise is display-only, not marked done)
 export const TRACKABLE_PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
-// BUG 2 FIX: ALL_PRAYERS now includes Sunrise so it renders as a display-only
-// card in HomeScreen. PrayerCard handles isTrackable=false automatically
-// (no checkbox, reduced opacity).
-export const ALL_PRAYERS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+// ALL_PRAYERS includes Sunrise and Sunset as display-only cards (not trackable).
+// PrayerCard handles isTrackable=false automatically (no checkbox, reduced opacity).
+export const ALL_PRAYERS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Sunset', 'Maghrib', 'Isha'];
 
 export const PRAYER_META = {
   Fajr:    { icon: '🌅', image: require('../../assets/prayers/fajr.png'),    arabic: 'الفجر',   color: '#7B8CDE' },
   Sunrise: { icon: '🌄', image: require('../../assets/prayers/sunrise.png'), arabic: 'الشروق',  color: '#F9A825' },
   Dhuhr:   { icon: '☀️', image: require('../../assets/prayers/dhuhr.png'),   arabic: 'الظهر',   color: '#FFD600' },
   Asr:     { icon: '🌤️', image: require('../../assets/prayers/asr.png'),    arabic: 'العصر',   color: '#FF8F00' },
+  Sunset:  { icon: '🌅', image: require('../../assets/prayers/maghrib.png'), arabic: 'الغروب',  color: '#E65100' },
   Maghrib: { icon: '🌇', image: require('../../assets/prayers/maghrib.png'), arabic: 'المغرب',  color: '#FF7043' },
   Isha:    { icon: '🌙', image: require('../../assets/prayers/isha.png'),    arabic: 'العشاء',  color: '#5C6BC0' },
 };
@@ -31,6 +31,7 @@ export const calculatePrayerTimes = (latitude, longitude, date = new Date()) => 
     Sunrise: times.sunrise,
     Dhuhr:   times.dhuhr,
     Asr:     times.asr,
+    Sunset:  times.sunset,
     Maghrib: times.maghrib,
     Isha:    times.isha,
   };
