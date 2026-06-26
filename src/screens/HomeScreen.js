@@ -50,14 +50,18 @@ function getHijriDate(date = new Date()) {
 // ── End-time lookup: when does a given prayer period close? ──────────────────
 const PRAYER_END_KEY = {
   Fajr:    'Sunrise',
-  Sunrise: null,     // Sunrise is a single moment, not a period — no end time
+  Sunrise: null,     // single moment — no end time
   Dhuhr:   'Asr',
-  Asr:     'Maghrib',
+  Asr:     'Sunset', // Asr ends at Sunset
+  Sunset:  null,     // single moment — no end time
   Maghrib: 'Isha',
-  Isha:    null,
+  Isha:    null,     // handled separately via tomorrowFajr
 };
 
-function getEndTime(prayerName, times) {
+function getEndTime(prayerName, times, tomorrowFajrDate) {
+  if (prayerName === 'Isha') {
+    return tomorrowFajrDate ? formatTime(tomorrowFajrDate) : null;
+  }
   const key = PRAYER_END_KEY[prayerName];
   return key ? formatTime(times[key]) : null;
 }
@@ -206,7 +210,7 @@ export default function HomeScreen() {
           <NextPrayerBanner
             name={nextPrayer.name}
             time={formatTime(nextPrayer.time)}
-            endTime={getEndTime(nextPrayer.name, prayerTimes)}
+            endTime={getEndTime(nextPrayer.name, prayerTimes, tomorrowFajr)}
             countdown={countdown}
             meta={PRAYER_META[nextPrayer.name]}
             onLocationPress={load}
@@ -242,7 +246,7 @@ export default function HomeScreen() {
               name={prayer}
               meta={PRAYER_META[prayer]}
               time={formatTime(prayerTimes?.[prayer])}
-              endTime={getEndTime(prayer, prayerTimes ?? {})}
+              endTime={getEndTime(prayer, prayerTimes ?? {}, tomorrowFajr)}
               isCompleted={completedPrayers.includes(prayer)}
               isTrackable={TRACKABLE_PRAYERS.includes(prayer)}
               onToggle={() => handleToggle(prayer)}
