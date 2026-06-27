@@ -217,7 +217,7 @@ export default function QuranScreen() {
   // ── Render: Surah list ──────────────────────────────────────────────────────
   if (view === 'list') {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -285,7 +285,7 @@ export default function QuranScreen() {
 
   // ── Render: Surah detail ────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
 
       {/* Surah header */}
       <View style={styles.surahHeader}>
