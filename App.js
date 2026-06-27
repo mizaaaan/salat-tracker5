@@ -63,11 +63,20 @@ function Navigation() {
             shadowOpacity:   0.06,
             shadowRadius:    6,
             elevation:       8,
-            // Portrait: NO overrides at all â keeps original behaviour exactly.
-            // Landscape: ONLY height is bumped so icons/labels aren't squished.
-            //            paddingBottom is NOT set â React Navigation still handles
-            //            the home-indicator safe area automatically.
-            ...(isLandscape ? { height: Platform.OS === 'ios' ? 70 : 60 } : {}),
+            position: 'absolute',
+            left:   0,
+            right:  0,
+            bottom: 0,
+            // FIX: portrait previously had NO height override, so React
+            // Navigation fell back to its own default bar height, which
+            // doesn't reach the bottom of the screen rect on every device.
+            // That left a strip of the screen's own background color
+            // exposed between the content and the visible white bar — on
+            // EVERY tab, since this tabBarStyle is the one place shared by
+            // all five screens. Pinning bottom:0 + an explicit height in
+            // both orientations makes the bar's background fill that strip.
+            height: Platform.OS === 'ios' ? (isLandscape ? 70 : 88) : 60,
+            paddingTop: 8,
           },
           tabBarActiveTintColor:   Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
