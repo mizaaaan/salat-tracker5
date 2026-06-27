@@ -111,16 +111,21 @@ const getStyles = (Colors) => StyleSheet.create({
   },
 
   // Each tile is ~31.3% wide so 3 fit per row with 2 gaps of ~3% each.
+  // FIXED height (not minHeight) so every tile is identical regardless of
+  // text length — previously longer 2-line English labels (e.g. "Gratitude
+  // & Repentance") made some tiles taller than others, breaking row
+  // alignment and visually clipping the last row against the tab bar.
   tile: {
     width:           '31.3%',
+    height:          132,
     backgroundColor: Colors.card,
     borderRadius:    16,
     borderWidth:     1,
     borderColor:     Colors.border,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 6,
     alignItems:      'center',
-    minHeight:       104,
+    justifyContent:  'center',
   },
   tileIconWrap: {
     width:           44,
@@ -131,7 +136,7 @@ const getStyles = (Colors) => StyleSheet.create({
     justifyContent:  'center',
     marginBottom:    8,
   },
-  tileIcon: { fontSize: 20 },
+  tileIconImage: { width: 26, height: 26 },
   tileBn: {
     fontSize:    13,
     fontWeight:  '700',
@@ -144,5 +149,6 @@ const getStyles = (Colors) => StyleSheet.create({
     color:      Colors.textSecondary,
     textAlign:  'center',
     lineHeight: 13,
+    height:     26,   // reserves space for exactly 2 lines, even if text is 1 line
   },
 });
