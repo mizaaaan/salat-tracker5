@@ -35,19 +35,25 @@ function computeArcLayout(screenW, screenH) {
   const isLandscape = screenH && screenW > screenH;
   // ARC_W always spans the card (same as original) — no width cap.
   // Capping width made the arc a small shape floating in a wide card.
-  const ARC_W   = CARD_W - 48;
-  const LEFT_X  = 10;
-  const RIGHT_X = ARC_W - 10;
-  const ARC_RX  = (RIGHT_X - LEFT_X) / 2;
-  // Only cap the HEIGHT (ARC_RY) so the card doesn't overflow the screen.
-  // Portrait  → ARC_RX ≈ 145 → ARC_RY = 145 → near-perfect semicircle (unchanged).
-  // Landscape → ARC_RX ≈ 370, but cap RY at ~130 so CARD_H ≈ 228px fits in
-  //             the ~390px landscape screen alongside greeting + nav bar.
-  const MAX_ARC_H = screenH
+  const ARC_W      = CARD_W - 48;
+  const FULL_LEFT  = 10;
+  const FULL_RIGHT = ARC_W - 10;
+  const FULL_RX    = (FULL_RIGHT - FULL_LEFT) / 2;
+  // Cap the radius (not just the height) so RX and RY stay EQUAL — that's
+  // what keeps the arc a true semicircle. Previously only RY was capped,
+  // which left RX huge in landscape and squashed the arc into a flat,
+  // wide ellipse instead of a semicircle.
+  // Portrait  → FULL_RX ≈ 145, under the cap → unchanged near-perfect semicircle.
+  // Landscape → FULL_RX ≈ 370, capped to ~130 → ARC_RX = ARC_RY → real semicircle,
+  //             centered within the wider card instead of stretched edge-to-edge.
+  const MAX_ARC_R = screenH
     ? Math.min(screenH * 0.34, isLandscape ? 130 : 150)
     : 150;
-  const ARC_RY  = Math.min(ARC_RX, MAX_ARC_H);
-  const ARC_CX  = (LEFT_X + RIGHT_X) / 2;
+  const ARC_RX  = Math.min(FULL_RX, MAX_ARC_R);
+  const ARC_RY  = ARC_RX;
+  const ARC_CX  = (FULL_LEFT + FULL_RIGHT) / 2;
+  const LEFT_X  = ARC_CX - ARC_RX;
+  const RIGHT_X = ARC_CX + ARC_RX;
   const BASE_Y  = ARC_RY + 8;
   const ARC_H   = BASE_Y + 8;
   // +82 accounts for topRow (~34px) + dots (~11px) + padding/spacers (~37px).
