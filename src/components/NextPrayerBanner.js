@@ -33,20 +33,18 @@ const PRAYER_TINT = {
 function computeArcLayout(screenW, screenH) {
   const CARD_W      = screenW - 32;
   const isLandscape = screenH && screenW > screenH;
-  // In landscape, cap arc width so it doesn't stretch into a flat ellipse.
-  // Portrait: ARC_W ≈ CARD_W - 48 (unchanged).
-  // Landscape: cap to screenH * 1.2 so RX stays proportional to RY.
-  const ARC_W   = isLandscape
-    ? Math.min(CARD_W - 48, screenH * 1.2)
-    : CARD_W - 48;
+  // ARC_W always spans the card (same as original) — no width cap.
+  // Capping width made the arc a small shape floating in a wide card.
+  const ARC_W   = CARD_W - 48;
   const LEFT_X  = 10;
   const RIGHT_X = ARC_W - 10;
   const ARC_RX  = (RIGHT_X - LEFT_X) / 2;
-  // Portrait  → cap 150px (near-semicircle).
-  // Landscape → cap 120px so CARD_H ≈ 218px fits within a ~390px landscape screen,
-  //             leaving room for greeting bar + nav bar.
+  // Only cap the HEIGHT (ARC_RY) so the card doesn't overflow the screen.
+  // Portrait  → ARC_RX ≈ 145 → ARC_RY = 145 → near-perfect semicircle (unchanged).
+  // Landscape → ARC_RX ≈ 370, but cap RY at ~130 so CARD_H ≈ 228px fits in
+  //             the ~390px landscape screen alongside greeting + nav bar.
   const MAX_ARC_H = screenH
-    ? Math.min(screenH * 0.30, isLandscape ? 120 : 150)
+    ? Math.min(screenH * 0.34, isLandscape ? 130 : 150)
     : 150;
   const ARC_RY  = Math.min(ARC_RX, MAX_ARC_H);
   const ARC_CX  = (LEFT_X + RIGHT_X) / 2;
