@@ -200,7 +200,12 @@ export default function HomeScreen() {
   // ── Render: main ───────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarHeight }}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="never"
+        scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        contentContainerStyle={{ paddingBottom: 16 }}
+      >
 
         {/* Header */}
         <View style={styles.header}>
