@@ -173,7 +173,7 @@ export default function HomeScreen() {
   // ── Render: loading ────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>Calculating prayer times…</Text>
@@ -185,7 +185,7 @@ export default function HomeScreen() {
   // ── Render: error ──────────────────────────────────────────────────────────
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.center}>
           <Text style={{ fontSize: 48 }}>⚠️</Text>
           <Text style={styles.errorText}>{error}</Text>
@@ -199,7 +199,7 @@ export default function HomeScreen() {
 
   // ── Render: main ───────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarHeight }}>
 
         {/* Header */}
