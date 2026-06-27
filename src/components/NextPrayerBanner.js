@@ -55,7 +55,12 @@ function computeArcLayout(screenW, screenH) {
   const LEFT_X  = ARC_CX - ARC_RX;
   const RIGHT_X = ARC_CX + ARC_RX;
   const BASE_Y  = ARC_RY + 8;
-  const ARC_H   = BASE_Y + 8;
+  // Extra top headroom above the arc's curve so the Hijri-date text (top
+  // line of arcInfoOverlay, anchored to the bottom of this same box) has
+  // breathing room and doesn't touch the stroke. Shape (ARC_RX/ARC_RY) is
+  // untouched — only the box the arc sits inside is taller.
+  const ARC_TOP_GAP = 22;
+  const ARC_H   = BASE_Y + ARC_TOP_GAP;
   // +82 accounts for topRow (~34px) + dots (~11px) + padding/spacers (~37px).
   const CARD_H  = ARC_H + 82;
 
