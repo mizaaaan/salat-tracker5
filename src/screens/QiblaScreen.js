@@ -12,7 +12,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView,
+  View, Text, StyleSheet,
   ActivityIndicator, Animated, useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -126,7 +126,7 @@ export default function QiblaScreen() {
   // ── Loading / error ───────────────────────────────────────────────────────
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>Finding Qibla direction…</Text>
@@ -137,7 +137,7 @@ export default function QiblaScreen() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.center}>
           <Text style={{ fontSize: 48 }}>🧭</Text>
           <Text style={styles.errorText}>{error}</Text>
@@ -147,11 +147,8 @@ export default function QiblaScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.content}>
 
         <Text style={styles.title}>🕋 Qibla Direction</Text>
         <Text style={styles.subtitle}>Point your phone to find Mecca</Text>
@@ -229,7 +226,7 @@ export default function QiblaScreen() {
           🌍 Hold phone flat and rotate until the 🕋 arrow points straight up
         </Text>
 
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -252,10 +249,9 @@ const getStyles = (Colors, SIZE = 280) => StyleSheet.create({
     lineHeight: 22,
   },
   content: {
-    flexGrow:          1,
+    flex:              1,
     alignItems:        'center',
     paddingTop:        24,
-    paddingBottom:     24,
     paddingHorizontal: 20,
   },
   title:    { fontSize: 24, fontWeight: '700', color: Colors.text },
