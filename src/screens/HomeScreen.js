@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import * as Location from 'expo-location';
 
 import { useTheme } from '../constants/ThemeContext';
@@ -69,6 +70,7 @@ function getEndTime(prayerName, times, tomorrowFajrDate) {
 // ── Component ────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
   const { colors: Colors } = useTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const styles = getStyles(Colors);
 
   const [prayerTimes,      setPrayerTimes]      = useState(null);
@@ -198,7 +200,7 @@ export default function HomeScreen() {
   // ── Render: main ───────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarHeight }}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -259,7 +261,6 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );
