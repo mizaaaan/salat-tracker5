@@ -138,7 +138,7 @@ export default function ToolsScreen() {
   // ── Loading screen ────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
@@ -148,7 +148,7 @@ export default function ToolsScreen() {
 
   // ── Main render ───────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
