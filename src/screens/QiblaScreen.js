@@ -12,7 +12,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet,
+  View, Text, StyleSheet, ScrollView,
   ActivityIndicator, Animated, useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -148,7 +148,10 @@ export default function QiblaScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
 
         <Text style={styles.title}>🕋 Qibla Direction</Text>
         <Text style={styles.subtitle}>Point your phone to find Mecca</Text>
@@ -226,7 +229,7 @@ export default function QiblaScreen() {
           🌍 Hold phone flat and rotate until the 🕋 arrow points straight up
         </Text>
 
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -249,9 +252,10 @@ const getStyles = (Colors, SIZE = 280) => StyleSheet.create({
     lineHeight: 22,
   },
   content: {
-    flex:              1,
+    flexGrow:          1,
     alignItems:        'center',
     paddingTop:        24,
+    paddingBottom:     24,
     paddingHorizontal: 20,
   },
   title:    { fontSize: 24, fontWeight: '700', color: Colors.text },
