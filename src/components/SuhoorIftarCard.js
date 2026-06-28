@@ -82,7 +82,7 @@ function Panel({ emoji, label, arabic, time, isNext, cd, progress, color, S }) {
       <Text style={[S.time, { color }]}>{time}</Text>
       {isNext
         ? <Text style={[S.cd, { color }]}>{cd}</Text>
-        : <Text style={S.done}>✓</Text>
+        : <Text style={S.done}>â</Text>
       }
       <Text style={S.label}>{label}</Text>
     </View>
@@ -115,34 +115,34 @@ export default function SuhoorIftarCard({ fajrTime, maghribTime }) {
   const cdSuhoor = suhoorIsNext && suhoorEnd  ? countdown(suhoorEnd)  : null;
   const cdIftar  = iftarIsNext  && iftarStart ? countdown(iftarStart) : null;
   const activeCd = suhoorIsNext ? cdSuhoor : iftarIsNext ? cdIftar : null;
-  const activeLabel = suhoorIsNext ? '⏳ Suhoor ends in' : iftarIsNext ? '⏳ Iftar starts in' : null;
+  const activeLabel = suhoorIsNext ? 'â³ Suhoor ends in' : iftarIsNext ? 'â³ Iftar starts in' : null;
   const activeColor = suhoorIsNext ? '#5BB8D4' : '#C9A84C';
 
   return (
     <View style={S.card}>
       {/* Top row: title + hijri badge + countdown */}
       <View style={S.topRow}>
-        <Text style={S.title}>🌙 Suhoor & Iftar</Text>
+        <Text style={S.title}>ð Suhoor & Iftar</Text>
         {activeCd && (
           <View style={[S.cdBadge, { borderColor: activeColor + '55', backgroundColor: activeColor + '15' }]}>
-            <Text style={[S.cdBadgeLabel, { color: activeColor }]}>{activeLabel?.replace('⏳ ', '')} </Text>
+            <Text style={[S.cdBadgeLabel, { color: activeColor }]}>{activeLabel?.replace('â³ ', '')} </Text>
             <Text style={[S.cdBadgeTime, { color: activeColor }]}>{activeCd}</Text>
           </View>
         )}
         <View style={[S.hijriBadge, hijri.isRamadan && { borderColor: '#C9A84C55', backgroundColor: '#C9A84C15' }]}>
           <Text style={[S.hijriText, hijri.isRamadan && { color: '#C9A84C' }]}>
-            {hijri.isRamadan ? '🌙 Ramadan' : hijri.month}
+            {hijri.isRamadan ? 'ð Ramadan' : hijri.month}
           </Text>
         </View>
       </View>
 
       {/* Two panels */}
       <View style={S.panels}>
-        <Panel emoji="🌙" label="Suhoor ends" arabic="السحور"
+        <Panel emoji="ð" label="Suhoor ends" arabic="Ø§ÙØ³Ø­ÙØ±"
           time={fmt12(fajrTime)} isNext={suhoorIsNext} cd={cdSuhoor}
           progress={suhoorProg} color="#5BB8D4" S={S} />
         <View style={S.sep} />
-        <Panel emoji="🌅" label="Iftar time" arabic="الإفطار"
+        <Panel emoji="ð" label="Iftar time" arabic="Ø§ÙØ¥ÙØ·Ø§Ø±"
           time={fmt12(maghribTime)} isNext={iftarIsNext} cd={cdIftar}
           progress={iftarProg} color="#C9A84C" S={S} />
       </View>
