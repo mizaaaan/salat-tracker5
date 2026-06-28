@@ -101,10 +101,10 @@ const getStyles = (Colors) => StyleSheet.create({
   content:   { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
 
   // ── Header ──
-  header:        { alignItems: 'center', marginBottom: 20 },
-  headerImage:    { width: 80, height: 80, marginBottom: 6 },
-  headerTitle:    { fontSize: 20, fontWeight: '700', color: Colors.text },
-  headerSubtitle: { fontSize: 12.5, color: Colors.textSecondary, marginTop: 2 },
+  header:        { alignItems: 'center', marginBottom: 12 },
+  headerImage:    { width: 48, height: 48, marginBottom: 4 },
+  headerTitle:    { fontSize: 16, fontWeight: '700', color: Colors.text },
+  headerSubtitle: { fontSize: 11, color: Colors.textSecondary, marginTop: 1 },
 
   // ── Grid: 3 columns, equal gutters ──
   grid: {
