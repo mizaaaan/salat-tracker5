@@ -70,7 +70,11 @@ export default function DuaScreen({ navigation }) {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerIcon}>🤲</Text>
+          <Image
+            source={require('../../assets/dua.png')}
+            style={styles.headerImage}
+            resizeMode="contain"
+          />
           <Text style={styles.headerTitle}>দোয়া ও যিকর</Text>
           <Text style={styles.headerSubtitle}>Dua & Azkar Collection</Text>
         </View>
@@ -98,7 +102,7 @@ const getStyles = (Colors) => StyleSheet.create({
 
   // ── Header ──
   header:        { alignItems: 'center', marginBottom: 20 },
-  headerIcon:     { fontSize: 38, marginBottom: 6 },
+  headerImage:    { width: 80, height: 80, marginBottom: 6 },
   headerTitle:    { fontSize: 20, fontWeight: '700', color: Colors.text },
   headerSubtitle: { fontSize: 12.5, color: Colors.textSecondary, marginTop: 2 },
 
