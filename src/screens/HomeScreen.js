@@ -20,6 +20,7 @@ import {
 import PrayerCard         from '../components/PrayerCard';
 import NextPrayerBanner   from '../components/NextPrayerBanner';
 import PrayerProgressBar  from '../components/PrayerProgressBar';
+import SuhoorIftarCard    from '../components/SuhoorIftarCard';
 
 // ── Hijri date calculator ────────────────────────────────────────────────────
 function getHijriDate(date = new Date()) {
@@ -260,6 +261,14 @@ export default function HomeScreen() {
             </View>
           ))}
         </View>
+
+        {/* Suhoor & Iftar card */}
+        <SuhoorIftarCard
+          fajrTime={prayerTimes?.Fajr}
+          maghribTime={prayerTimes?.Maghrib}
+        />
+
+        <View style={{ height: 16 }} />
 
       </ScrollView>
     </SafeAreaView>
