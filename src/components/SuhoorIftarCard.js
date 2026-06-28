@@ -1,15 +1,7 @@
-/**
- * SuhoorIftarCard
- * Suhoor ends at Fajr · Iftar begins at Maghrib
- * Shows today's times + live countdown to whichever is next.
- */
-
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../constants/ThemeContext';
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -30,7 +22,6 @@ function fmt12(date) {
   return `${h}:${pad(m)} ${ampm}`;
 }
 
-// Hijri month names (for label)
 const HIJRI_MONTHS = [
   'Muharram','Safar',"Rabi' al-Awwal","Rabi' al-Thani",
   'Jumada I','Jumada II','Rajab',"Sha'ban",
@@ -48,245 +39,147 @@ function getHijriMonth() {
            - Math.floor((30 - j) / 15) * Math.floor((17_719 * j) / 50)
            - Math.floor(j / 16) * Math.floor((15_238 * j) / 43) + 29;
   const hM = Math.floor((24 * l3) / 709);
-  const hD = l3 - Math.floor((709 * hM) / 24);
-  return { month: HIJRI_MONTHS[hM - 1], day: hD, isRamadan: hM === 9 };
+  return { month: HIJRI_MONTHS[hM - 1], isRamadan: hM === 9 };
 }
 
-// ── Arc progress ring ─────────────────────────────────────────────────────────
-function ArcRing({ progress, color, size = 56 }) {
-  const R   = (size - 6) / 2;
-  const C   = 2 * Math.PI * R;
-  const off = C * (1 - Math.min(Math.max(progress, 0), 1));
+function MiniRing({ progress, color, size = 38 }) {
+  const R = (size - 4) / 2;
+  const C = 2 * Math.PI * R;
   return (
     <Svg width={size} height={size}>
-      <Defs>
-        <LinearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <Stop offset="100%" stopColor={color} stopOpacity="1" />
-        </LinearGradient>
-      </Defs>
-      <Circle cx={size/2} cy={size/2} r={R} stroke="rgba(255,255,255,0.08)" strokeWidth={5} fill="none" />
+      <Circle cx={size/2} cy={size/2} r={R} stroke="rgba(255,255,255,0.07)" strokeWidth={3.5} fill="none" />
       <Circle
         cx={size/2} cy={size/2} r={R}
-        stroke={`url(#arcGrad)`} strokeWidth={5} fill="none"
+        stroke={color} strokeWidth={3.5} fill="none"
         strokeLinecap="round"
         strokeDasharray={`${C} ${C}`}
-        strokeDashoffset={off}
+        strokeDashoffset={C * (1 - Math.min(Math.max(progress, 0), 1))}
         transform={`rotate(-90 ${size/2} ${size/2})`}
       />
     </Svg>
   );
 }
 
-// ── Panel (left = Suhoor, right = Iftar) ─────────────────────────────────────
-function Panel({ emoji, label, arabicLabel, time, isNext, countdown: cd, progress, accentColor, S }) {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
+function Panel({ emoji, label, arabic, time, isNext, cd, progress, color, S }) {
+  const pulse = useRef(new Animated.Value(1)).current;
   useEffect(() => {
-    if (!isNext) return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.08, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1,    duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      ])
-    );
+    if (!isNext) { pulse.setValue(1); return; }
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: 1.12, duration: 850, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1,    duration: 850, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+    ]));
     loop.start();
     return () => loop.stop();
   }, [isNext]);
 
   return (
-    <View style={[S.panel, isNext && { borderColor: accentColor + '55', backgroundColor: accentColor + '10' }]}>
-      {/* Arc ring + emoji */}
+    <View style={[S.panel, isNext && { borderColor: color + '50', backgroundColor: color + '0D' }]}>
       <View style={S.ringWrap}>
-        <ArcRing progress={progress} color={accentColor} size={56} />
-        <Animated.Text style={[S.panelEmoji, { transform: [{ scale: isNext ? pulseAnim : 1 }] }]}>
-          {emoji}
-        </Animated.Text>
+        <MiniRing progress={progress} color={color} size={38} />
+        <Animated.Text style={[S.emoji, { transform: [{ scale: isNext ? pulse : 1 }] }]}>{emoji}</Animated.Text>
       </View>
-
-      {/* Labels */}
-      <Text style={[S.panelArabic, { color: accentColor }]}>{arabicLabel}</Text>
-      <Text style={S.panelLabel}>{label}</Text>
-      <Text style={[S.panelTime, { color: accentColor }]}>{time}</Text>
-
-      {isNext && (
-        <View style={[S.countdownPill, { backgroundColor: accentColor + '18', borderColor: accentColor + '40' }]}>
-          <Text style={[S.countdownText, { color: accentColor }]}>{cd}</Text>
-        </View>
-      )}
-      {!isNext && (
-        <View style={S.donePill}>
-          <Text style={S.doneText}>✓ Done</Text>
-        </View>
-      )}
+      <Text style={[S.arabic, { color }]}>{arabic}</Text>
+      <Text style={[S.time, { color }]}>{time}</Text>
+      {isNext
+        ? <Text style={[S.cd, { color }]}>{cd}</Text>
+        : <Text style={S.done}>â</Text>
+      }
+      <Text style={S.label}>{label}</Text>
     </View>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function SuhoorIftarCard({ fajrTime, maghribTime }) {
   const { colors: C } = useTheme();
   const S = getStyles(C);
 
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const now      = Date.now();
-  const hijri    = getHijriMonth();
-
-  // Suhoor ends at Fajr; Iftar starts at Maghrib
-  const suhoorEnd  = fajrTime   ? new Date(fajrTime).getTime()   : null;
+  const now        = Date.now();
+  const hijri      = getHijriMonth();
+  const suhoorEnd  = fajrTime    ? new Date(fajrTime).getTime()    : null;
   const iftarStart = maghribTime ? new Date(maghribTime).getTime() : null;
 
-  // Which is "next"?
-  // Before Fajr → suhoor is next
-  // Between Fajr and Maghrib → iftar is next
-  // After Maghrib → both done for today
-  const suhoorIsNext  = suhoorEnd  && now < suhoorEnd;
-  const iftarIsNext   = iftarStart && now >= (suhoorEnd ?? 0) && now < iftarStart;
+  const suhoorIsNext = suhoorEnd  && now < suhoorEnd;
+  const iftarIsNext  = iftarStart && now >= (suhoorEnd ?? 0) && now < iftarStart;
 
-  // Arc progress — how much of the window has elapsed
-  // Suhoor window: midnight → Fajr  (approx 6h)
-  const MIDNIGHT   = new Date(); MIDNIGHT.setHours(0,0,0,0);
-  const suhoorProg = suhoorEnd
-    ? Math.max(0, 1 - (suhoorEnd - now) / (suhoorEnd - MIDNIGHT.getTime()))
-    : 1;
+  const midnight   = new Date(); midnight.setHours(0,0,0,0);
+  const suhoorProg = suhoorEnd  ? Math.max(0, 1 - (suhoorEnd - now) / (suhoorEnd - midnight.getTime())) : 1;
+  const iftarProg  = (suhoorEnd && iftarStart)
+    ? Math.max(0, (now - suhoorEnd) / (iftarStart - suhoorEnd)) : 1;
 
-  // Iftar window: Fajr → Maghrib (day window)
-  const iftarProg = (suhoorEnd && iftarStart)
-    ? Math.max(0, (now - suhoorEnd) / (iftarStart - suhoorEnd))
-    : 1;
-
-  const cdSuhoor = suhoorIsNext && suhoorEnd ? countdown(suhoorEnd) : null;
+  const cdSuhoor = suhoorIsNext && suhoorEnd  ? countdown(suhoorEnd)  : null;
   const cdIftar  = iftarIsNext  && iftarStart ? countdown(iftarStart) : null;
-
-  // Today label
-  const today = new Date().toLocaleDateString('en', { weekday: 'long', day: 'numeric', month: 'long' });
+  const activeCd = suhoorIsNext ? cdSuhoor : iftarIsNext ? cdIftar : null;
+  const activeLabel = suhoorIsNext ? 'â³ Suhoor ends in' : iftarIsNext ? 'â³ Iftar starts in' : null;
+  const activeColor = suhoorIsNext ? '#5BB8D4' : '#C9A84C';
 
   return (
     <View style={S.card}>
-      {/* Header */}
-      <View style={S.cardHeader}>
-        <View>
-          <Text style={S.cardTitle}>🌙 Suhoor & Iftar</Text>
-          <Text style={S.cardDate}>{today}</Text>
-        </View>
-        <View style={[S.hijriBadge, hijri.isRamadan && { backgroundColor: '#C9A84C22', borderColor: '#C9A84C55' }]}>
+      {/* Top row: title + hijri badge + countdown */}
+      <View style={S.topRow}>
+        <Text style={S.title}>ð Suhoor & Iftar</Text>
+        {activeCd && (
+          <View style={[S.cdBadge, { borderColor: activeColor + '55', backgroundColor: activeColor + '15' }]}>
+            <Text style={[S.cdBadgeLabel, { color: activeColor }]}>{activeLabel?.replace('â³ ', '')} </Text>
+            <Text style={[S.cdBadgeTime, { color: activeColor }]}>{activeCd}</Text>
+          </View>
+        )}
+        <View style={[S.hijriBadge, hijri.isRamadan && { borderColor: '#C9A84C55', backgroundColor: '#C9A84C15' }]}>
           <Text style={[S.hijriText, hijri.isRamadan && { color: '#C9A84C' }]}>
-            {hijri.isRamadan ? '🌙 Ramadan' : hijri.month}
+            {hijri.isRamadan ? 'ð Ramadan' : hijri.month}
           </Text>
         </View>
       </View>
-
-      {/* Active banner */}
-      {(suhoorIsNext || iftarIsNext) && (
-        <View style={[
-          S.activeBanner,
-          { backgroundColor: suhoorIsNext ? '#5BB8D422' : '#C9A84C22', borderColor: suhoorIsNext ? '#5BB8D455' : '#C9A84C55' },
-        ]}>
-          <Text style={[S.activeBannerText, { color: suhoorIsNext ? '#5BB8D4' : '#C9A84C' }]}>
-            {suhoorIsNext ? '⏳ Suhoor ends in' : '⏳ Iftar starts in'}
-          </Text>
-          <Text style={[S.activeBannerTime, { color: suhoorIsNext ? '#5BB8D4' : '#C9A84C' }]}>
-            {suhoorIsNext ? cdSuhoor : cdIftar}
-          </Text>
-        </View>
-      )}
 
       {/* Two panels */}
       <View style={S.panels}>
-        <Panel
-          emoji="🌙"
-          label="Suhoor Ends"
-          arabicLabel="السحور"
-          time={fmt12(fajrTime)}
-          isNext={suhoorIsNext}
-          countdown={cdSuhoor}
-          progress={suhoorProg}
-          accentColor="#5BB8D4"
-          S={S}
-        />
-
-        <View style={S.divider} />
-
-        <Panel
-          emoji="🌅"
-          label="Iftar Time"
-          arabicLabel="الإفطار"
-          time={fmt12(maghribTime)}
-          isNext={iftarIsNext}
-          countdown={cdIftar}
-          progress={iftarProg}
-          accentColor="#C9A84C"
-          S={S}
-        />
+        <Panel emoji="ð" label="Suhoor ends" arabic="Ø§ÙØ³Ø­ÙØ±"
+          time={fmt12(fajrTime)} isNext={suhoorIsNext} cd={cdSuhoor}
+          progress={suhoorProg} color="#5BB8D4" S={S} />
+        <View style={S.sep} />
+        <Panel emoji="ð" label="Iftar time" arabic="Ø§ÙØ¥ÙØ·Ø§Ø±"
+          time={fmt12(maghribTime)} isNext={iftarIsNext} cd={cdIftar}
+          progress={iftarProg} color="#C9A84C" S={S} />
       </View>
-
-      {/* Footer note */}
-      <Text style={S.footer}>
-        Suhoor = before Fajr · Iftar = at Maghrib · Times update daily
-      </Text>
     </View>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const getStyles = (C) => StyleSheet.create({
   card: {
-    marginHorizontal: 16,
-    marginTop:        10,
-    backgroundColor:  C.card,
-    borderRadius:     20,
-    borderWidth:      1,
-    borderColor:      C.border,
-    overflow:         'hidden',
-    shadowColor:      '#000',
-    shadowOffset:     { width: 0, height: 2 },
-    shadowOpacity:    0.08,
-    shadowRadius:     12,
-    elevation:        4,
+    marginHorizontal: 16, marginTop: 10,
+    backgroundColor: C.card, borderRadius: 16,
+    borderWidth: 1, borderColor: C.border,
+    paddingHorizontal: 12, paddingTop: 10, paddingBottom: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
   },
 
-  // Header
-  cardHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 16, paddingBottom: 10 },
-  cardTitle:   { fontSize: 15, fontWeight: '700', color: C.text },
-  cardDate:    { fontSize: 11, color: C.textSecondary, marginTop: 3 },
-  hijriBadge:  { backgroundColor: C.cardLight, borderRadius: 10, borderWidth: 1, borderColor: C.border, paddingHorizontal: 10, paddingVertical: 5 },
-  hijriText:   { fontSize: 11, fontWeight: '600', color: C.textSecondary },
+  topRow:   { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' },
+  title:    { fontSize: 12, fontWeight: '700', color: C.text, marginRight: 2 },
 
-  // Active countdown banner
-  activeBanner:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 14, marginBottom: 10, borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
-  activeBannerText: { fontSize: 12, fontWeight: '600' },
-  activeBannerTime: { fontSize: 18, fontWeight: '900', letterSpacing: 1 },
+  cdBadge:      { flexDirection: 'row', alignItems: 'center', borderRadius: 8, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 3, flex: 1 },
+  cdBadgeLabel: { fontSize: 9, fontWeight: '600' },
+  cdBadgeTime:  { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
 
-  // Panels row
-  panels: { flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 14, gap: 0 },
-  divider:{ width: 1, backgroundColor: C.border, marginVertical: 4, marginHorizontal: 8 },
+  hijriBadge: { backgroundColor: C.cardLight, borderRadius: 8, borderWidth: 1, borderColor: C.border, paddingHorizontal: 7, paddingVertical: 3 },
+  hijriText:  { fontSize: 9, fontWeight: '600', color: C.textSecondary },
 
-  // Each panel
-  panel: {
-    flex:           1,
-    alignItems:     'center',
-    paddingVertical: 12,
-    borderRadius:   14,
-    borderWidth:    1,
-    borderColor:    'transparent',
-    gap:            4,
-  },
+  panels: { flexDirection: 'row', alignItems: 'center' },
+  sep:    { width: 1, height: 54, backgroundColor: C.border, marginHorizontal: 10 },
 
-  ringWrap:    { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
-  panelEmoji:  { position: 'absolute', fontSize: 22 },
-  panelArabic: { fontSize: 14, fontWeight: '700', marginTop: 4 },
-  panelLabel:  { fontSize: 10, color: C.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.8 },
-  panelTime:   { fontSize: 17, fontWeight: '900', letterSpacing: 0.3, marginTop: 2 },
+  panel:    { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 10, borderWidth: 1, borderColor: 'transparent', paddingVertical: 6, paddingHorizontal: 6 },
+  ringWrap: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
+  emoji:    { position: 'absolute', fontSize: 16 },
 
-  countdownPill: { borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4, marginTop: 4 },
-  countdownText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
-  donePill:    { backgroundColor: C.cardLight, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, marginTop: 4 },
-  doneText:    { fontSize: 11, color: C.textMuted, fontWeight: '600' },
-
-  footer:      { fontSize: 10, color: C.textMuted, textAlign: 'center', paddingBottom: 10, paddingHorizontal: 16 },
+  arabic: { fontSize: 13, fontWeight: '700' },
+  time:   { fontSize: 14, fontWeight: '900', letterSpacing: 0.2, position: 'absolute', left: 54, top: 18 },
+  cd:     { fontSize: 9,  fontWeight: '700', letterSpacing: 0.3, position: 'absolute', left: 54, bottom: 6 },
+  done:   { fontSize: 10, color: '#1AB87A', fontWeight: '800',   position: 'absolute', left: 54, bottom: 6 },
+  label:  { fontSize: 8,  color: C.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, position: 'absolute', left: 54, top: 6 },
 });
