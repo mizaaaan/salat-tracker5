@@ -1,8 +1,5 @@
 /**
- * PrayerCard — plain row style.
- * No individual card background/border — designed to live inside a shared
- * card container (HomeScreen wraps all prayers in one card).
- * All animations, toggle logic, and visual details are unchanged.
+ * PrayerCard — compact row style (reduced size).
  */
 
 import React, { useRef, useEffect } from 'react';
@@ -16,7 +13,6 @@ export default function PrayerCard({
 }) {
   const { colors: Colors } = useTheme();
 
-  // ── Animations ────────────────────────────────────────────────────────────
   const pressScale   = useRef(new Animated.Value(1)).current;
   const doneAnim     = useRef(new Animated.Value(isCompleted ? 1 : 0)).current;
   const checkScale   = useRef(new Animated.Value(isCompleted ? 1 : 0)).current;
@@ -34,28 +30,15 @@ export default function PrayerCard({
     if (!isTrackable) return;
     Animated.sequence([
       Animated.timing(pressScale, { toValue: 0.97, duration: 70,  useNativeDriver: true }),
-      Animated.spring(pressScale,  { toValue: 1,   tension: 200, friction: 5, useNativeDriver: true }),
+      Animated.spring(pressScale, { toValue: 1,    tension: 200, friction: 5, useNativeDriver: true }),
     ]).start();
     onToggle();
   };
 
-  // Animated colour interpolations
-  const overlayOpacity = doneAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: [0, 0.10],
-  });
-  const timeColor = doneAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: [Colors.textSecondary, Colors.primary],
-  });
-  const ringBorderColor = doneAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: [Colors.border, Colors.primary],
-  });
-  const ringBg = doneAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: ['rgba(0,0,0,0)', Colors.primary],
-  });
+  const overlayOpacity  = doneAnim.interpolate({ inputRange: [0,1], outputRange: [0, 0.10] });
+  const timeColor       = doneAnim.interpolate({ inputRange: [0,1], outputRange: [Colors.textSecondary, Colors.primary] });
+  const ringBorderColor = doneAnim.interpolate({ inputRange: [0,1], outputRange: [Colors.border, Colors.primary] });
+  const ringBg          = doneAnim.interpolate({ inputRange: [0,1], outputRange: ['rgba(0,0,0,0)', Colors.primary] });
 
   return (
     <Animated.View style={[{ transform: [{ scale: pressScale }] }, !isTrackable && styles.sunriseWrap]}>
@@ -64,18 +47,14 @@ export default function PrayerCard({
         activeOpacity={isTrackable ? 0.92 : 1}
         style={styles.row}
       >
-        {/* Subtle gold wash on completion */}
         <Animated.View style={[styles.wash, { backgroundColor: Colors.primary, opacity: overlayOpacity }]} />
-
-
 
         {/* Icon */}
         <View style={[styles.iconBox, { backgroundColor: meta.color + '20', borderColor: meta.color + '30' }]}>
-          {meta.image ? (
-            <Image source={meta.image} style={styles.iconImage} resizeMode="cover" />
-          ) : (
-            <Text style={styles.iconEmoji}>{meta.icon}</Text>
-          )}
+          {meta.image
+            ? <Image source={meta.image} style={styles.iconImage} resizeMode="cover" />
+            : <Text style={styles.iconEmoji}>{meta.icon}</Text>
+          }
         </View>
 
         {/* Name + Arabic */}
@@ -101,15 +80,12 @@ export default function PrayerCard({
               <Animated.Text style={[
                 styles.checkmark,
                 { transform: [{ scale: checkScale }], opacity: checkOpacity, color: Colors.background },
-              ]}>
-                ✓
-              </Animated.Text>
+              ]}>✓</Animated.Text>
             </Animated.View>
           ) : (
             <View style={[styles.markerDot, { backgroundColor: meta.color + '50' }]} />
           )}
         </View>
-
       </TouchableOpacity>
     </Animated.View>
   );
@@ -118,54 +94,48 @@ export default function PrayerCard({
 const styles = StyleSheet.create({
   sunriseWrap: { opacity: 0.52 },
 
-  // Plain row — no card background; parent container handles that
   row: {
-    flexDirection: 'row',
-    alignItems:    'center',
-    paddingLeft:   20,
-    paddingRight:  16,
-    paddingTop:    14,
-    paddingBottom: 14,
-    gap:           12,
+    flexDirection:  'row',
+    alignItems:     'center',
+    paddingLeft:    14,
+    paddingRight:   12,
+    paddingTop:     8,
+    paddingBottom:  8,
+    gap:            10,
   },
 
   wash: { ...StyleSheet.absoluteFillObject },
 
   iconBox: {
-    width:          44,
-    height:         44,
-    borderRadius:   12,
+    width:          34,
+    height:         34,
+    borderRadius:   9,
     borderWidth:    1,
     alignItems:     'center',
     justifyContent: 'center',
   },
-  iconEmoji: { fontSize: 22, lineHeight: 26 },
-  iconImage: { width: 40, height: 40, borderRadius: 10 },
+  iconEmoji: { fontSize: 17, lineHeight: 20 },
+  iconImage: { width: 30, height: 30, borderRadius: 8 },
 
-  nameCol: { flex: 1, gap: 3 },
-  name:    { fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
-  arabic:  { fontSize: 13, fontWeight: '600', letterSpacing: 0.5 },
+  nameCol: { flex: 1, gap: 1 },
+  name:    { fontSize: 14, fontWeight: '700', letterSpacing: 0.2 },
+  arabic:  { fontSize: 11, fontWeight: '600', letterSpacing: 0.4 },
 
-  rightCol: { alignItems: 'flex-end', gap: 10 },
-  timeRange: {
-    flexDirection:  'row',
-    alignItems:     'center',
-    flexWrap:       'wrap',
-    justifyContent: 'flex-end',
-  },
-  time:    { fontSize: 13, fontWeight: '700', letterSpacing: 0.3, textAlign: 'right' },
-  timeSep: { fontSize: 12, fontWeight: '400' },
-  timeEnd: { fontSize: 13, fontWeight: '500', letterSpacing: 0.3, textAlign: 'right' },
+  rightCol:  { alignItems: 'flex-end', gap: 7 },
+  timeRange: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' },
+  time:      { fontSize: 11, fontWeight: '700', letterSpacing: 0.2, textAlign: 'right' },
+  timeSep:   { fontSize: 10, fontWeight: '400' },
+  timeEnd:   { fontSize: 11, fontWeight: '500', letterSpacing: 0.2, textAlign: 'right' },
 
   ring: {
-    width:          30,
-    height:         30,
-    borderRadius:   15,
-    borderWidth:    2,
+    width:          24,
+    height:         24,
+    borderRadius:   12,
+    borderWidth:    1.5,
     alignItems:     'center',
     justifyContent: 'center',
   },
-  checkmark: { fontSize: 14, fontWeight: '900', lineHeight: 16 },
+  checkmark: { fontSize: 11, fontWeight: '900', lineHeight: 13 },
 
-  markerDot: { width: 8, height: 8, borderRadius: 4 },
+  markerDot: { width: 6, height: 6, borderRadius: 3 },
 });
