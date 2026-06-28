@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { useTheme } from '../constants/ThemeContext';
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -42,15 +42,15 @@ function getHijriMonth() {
   return { month: HIJRI_MONTHS[hM - 1], isRamadan: hM === 9 };
 }
 
-function MiniRing({ progress, color, size = 38 }) {
-  const R = (size - 4) / 2;
+function MiniRing({ progress, color, size = 40 }) {
+  const R = (size - 5) / 2;
   const C = 2 * Math.PI * R;
   return (
     <Svg width={size} height={size}>
-      <Circle cx={size/2} cy={size/2} r={R} stroke="rgba(255,255,255,0.07)" strokeWidth={3.5} fill="none" />
+      <Circle cx={size/2} cy={size/2} r={R} stroke="rgba(128,128,128,0.15)" strokeWidth={4} fill="none" />
       <Circle
         cx={size/2} cy={size/2} r={R}
-        stroke={color} strokeWidth={3.5} fill="none"
+        stroke={color} strokeWidth={4} fill="none"
         strokeLinecap="round"
         strokeDasharray={`${C} ${C}`}
         strokeDashoffset={C * (1 - Math.min(Math.max(progress, 0), 1))}
@@ -65,26 +65,38 @@ function Panel({ emoji, label, arabic, time, isNext, cd, progress, color, S }) {
   useEffect(() => {
     if (!isNext) { pulse.setValue(1); return; }
     const loop = Animated.loop(Animated.sequence([
-      Animated.timing(pulse, { toValue: 1.12, duration: 850, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(pulse, { toValue: 1,    duration: 850, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1.15, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1,    duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ]));
     loop.start();
     return () => loop.stop();
   }, [isNext]);
 
   return (
-    <View style={[S.panel, isNext && { borderColor: color + '50', backgroundColor: color + '0D' }]}>
-      <View style={S.ringWrap}>
-        <MiniRing progress={progress} color={color} size={38} />
-        <Animated.Text style={[S.emoji, { transform: [{ scale: isNext ? pulse : 1 }] }]}>{emoji}</Animated.Text>
+    <View style={[S.panel, isNext && { borderColor: color + '45', backgroundColor: color + '0C' }]}>
+
+      {/* Ring + emoji side by side with text info */}
+      <View style={S.panelInner}>
+
+        {/* Left: ring with emoji inside */}
+        <View style={S.ringWrap}>
+          <MiniRing progress={progress} color={color} size={40} />
+          <Animated.Text style={[S.emoji, { transform: [{ scale: isNext ? pulse : 1 }] }]}>
+            {emoji}
+          </Animated.Text>
+        </View>
+
+        {/* Right: label stack */}
+        <View style={S.textCol}>
+          <Text style={[S.smallLabel, { color: color }]}>{label.toUpperCase()}</Text>
+          <Text style={[S.arabic, { color }]}>{arabic}</Text>
+          <Text style={[S.time, { color }]}>{time}</Text>
+          {isNext && cd
+            ? <Text style={[S.cd, { color }]}>{cd}</Text>
+            : <Text style={S.done}>✓ Done</Text>
+          }
+        </View>
       </View>
-      <Text style={[S.arabic, { color }]}>{arabic}</Text>
-      <Text style={[S.time, { color }]}>{time}</Text>
-      {isNext
-        ? <Text style={[S.cd, { color }]}>{cd}</Text>
-        : <Text style={S.done}>â</Text>
-      }
-      <Text style={S.label}>{label}</Text>
     </View>
   );
 }
@@ -108,43 +120,53 @@ export default function SuhoorIftarCard({ fajrTime, maghribTime }) {
   const iftarIsNext  = iftarStart && now >= (suhoorEnd ?? 0) && now < iftarStart;
 
   const midnight   = new Date(); midnight.setHours(0,0,0,0);
-  const suhoorProg = suhoorEnd  ? Math.max(0, 1 - (suhoorEnd - now) / (suhoorEnd - midnight.getTime())) : 1;
+  const suhoorProg = suhoorEnd
+    ? Math.max(0, 1 - (suhoorEnd - now) / (suhoorEnd - midnight.getTime())) : 1;
   const iftarProg  = (suhoorEnd && iftarStart)
     ? Math.max(0, (now - suhoorEnd) / (iftarStart - suhoorEnd)) : 1;
 
   const cdSuhoor = suhoorIsNext && suhoorEnd  ? countdown(suhoorEnd)  : null;
   const cdIftar  = iftarIsNext  && iftarStart ? countdown(iftarStart) : null;
-  const activeCd = suhoorIsNext ? cdSuhoor : iftarIsNext ? cdIftar : null;
-  const activeLabel = suhoorIsNext ? 'â³ Suhoor ends in' : iftarIsNext ? 'â³ Iftar starts in' : null;
+  const activeCd    = suhoorIsNext ? cdSuhoor : iftarIsNext ? cdIftar : null;
+  const activeLabel = suhoorIsNext ? 'Suhoor ends in' : iftarIsNext ? 'Iftar starts in' : null;
   const activeColor = suhoorIsNext ? '#5BB8D4' : '#C9A84C';
 
   return (
     <View style={S.card}>
-      {/* Top row: title + hijri badge + countdown */}
-      <View style={S.topRow}>
-        <Text style={S.title}>ð Suhoor & Iftar</Text>
+
+      {/* Header row */}
+      <View style={S.headerRow}>
+        <Text style={S.title}>🌙 Suhoor & Iftar</Text>
+
         {activeCd && (
-          <View style={[S.cdBadge, { borderColor: activeColor + '55', backgroundColor: activeColor + '15' }]}>
-            <Text style={[S.cdBadgeLabel, { color: activeColor }]}>{activeLabel?.replace('â³ ', '')} </Text>
-            <Text style={[S.cdBadgeTime, { color: activeColor }]}>{activeCd}</Text>
+          <View style={[S.cdBadge, { borderColor: activeColor + '55', backgroundColor: activeColor + '14' }]}>
+            <Text style={[S.cdBadgeText, { color: activeColor }]}>
+              {activeLabel}{'  '}
+              <Text style={S.cdBadgeTimer}>{activeCd}</Text>
+            </Text>
           </View>
         )}
-        <View style={[S.hijriBadge, hijri.isRamadan && { borderColor: '#C9A84C55', backgroundColor: '#C9A84C15' }]}>
+
+        <View style={[S.hijriBadge, hijri.isRamadan && { borderColor: '#C9A84C55', backgroundColor: '#C9A84C14' }]}>
           <Text style={[S.hijriText, hijri.isRamadan && { color: '#C9A84C' }]}>
-            {hijri.isRamadan ? 'ð Ramadan' : hijri.month}
+            {hijri.isRamadan ? '🌙 Ramadan' : hijri.month}
           </Text>
         </View>
       </View>
 
-      {/* Two panels */}
+      {/* Panels */}
       <View style={S.panels}>
-        <Panel emoji="ð" label="Suhoor ends" arabic="Ø§ÙØ³Ø­ÙØ±"
-          time={fmt12(fajrTime)} isNext={suhoorIsNext} cd={cdSuhoor}
-          progress={suhoorProg} color="#5BB8D4" S={S} />
+        <Panel
+          emoji="🌙" label="Suhoor ends" arabic="السحور"
+          time={fmt12(fajrTime)} isNext={suhoorIsNext}
+          cd={cdSuhoor} progress={suhoorProg} color="#5BB8D4" S={S}
+        />
         <View style={S.sep} />
-        <Panel emoji="ð" label="Iftar time" arabic="Ø§ÙØ¥ÙØ·Ø§Ø±"
-          time={fmt12(maghribTime)} isNext={iftarIsNext} cd={cdIftar}
-          progress={iftarProg} color="#C9A84C" S={S} />
+        <Panel
+          emoji="🌅" label="Iftar time" arabic="الإفطار"
+          time={fmt12(maghribTime)} isNext={iftarIsNext}
+          cd={cdIftar} progress={iftarProg} color="#C9A84C" S={S}
+        />
       </View>
     </View>
   );
@@ -152,34 +174,86 @@ export default function SuhoorIftarCard({ fajrTime, maghribTime }) {
 
 const getStyles = (C) => StyleSheet.create({
   card: {
-    marginHorizontal: 16, marginTop: 10,
-    backgroundColor: C.card, borderRadius: 16,
-    borderWidth: 1, borderColor: C.border,
-    paddingHorizontal: 12, paddingTop: 10, paddingBottom: 10,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
+    marginHorizontal: 16,
+    marginTop:        10,
+    backgroundColor:  C.card,
+    borderRadius:     16,
+    borderWidth:      1,
+    borderColor:      C.border,
+    paddingHorizontal: 12,
+    paddingVertical:   10,
+    shadowColor:      '#000',
+    shadowOffset:     { width: 0, height: 2 },
+    shadowOpacity:    0.07,
+    shadowRadius:     8,
+    elevation:        3,
   },
 
-  topRow:   { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' },
-  title:    { fontSize: 12, fontWeight: '700', color: C.text, marginRight: 2 },
+  headerRow: {
+    flexDirection:  'row',
+    alignItems:     'center',
+    gap:            6,
+    marginBottom:   10,
+    flexWrap:       'wrap',
+  },
+  title: { fontSize: 12, fontWeight: '700', color: C.text },
 
-  cdBadge:      { flexDirection: 'row', alignItems: 'center', borderRadius: 8, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 3, flex: 1 },
-  cdBadgeLabel: { fontSize: 9, fontWeight: '600' },
-  cdBadgeTime:  { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+  cdBadge: {
+    flex:            1,
+    borderRadius:    8,
+    borderWidth:     1,
+    paddingHorizontal: 8,
+    paddingVertical:   4,
+  },
+  cdBadgeText:  { fontSize: 10, fontWeight: '600', color: '#888' },
+  cdBadgeTimer: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
 
-  hijriBadge: { backgroundColor: C.cardLight, borderRadius: 8, borderWidth: 1, borderColor: C.border, paddingHorizontal: 7, paddingVertical: 3 },
-  hijriText:  { fontSize: 9, fontWeight: '600', color: C.textSecondary },
+  hijriBadge: {
+    borderRadius:    8,
+    borderWidth:     1,
+    borderColor:     C.border,
+    backgroundColor: C.cardLight,
+    paddingHorizontal: 8,
+    paddingVertical:   4,
+  },
+  hijriText: { fontSize: 10, fontWeight: '600', color: C.textSecondary },
 
-  panels: { flexDirection: 'row', alignItems: 'center' },
-  sep:    { width: 1, height: 54, backgroundColor: C.border, marginHorizontal: 10 },
+  panels: {
+    flexDirection:  'row',
+    alignItems:     'stretch',
+  },
+  sep: {
+    width:          1,
+    backgroundColor: C.border,
+    marginHorizontal: 10,
+    marginVertical:   2,
+  },
 
-  panel:    { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 10, borderWidth: 1, borderColor: 'transparent', paddingVertical: 6, paddingHorizontal: 6 },
-  ringWrap: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
-  emoji:    { position: 'absolute', fontSize: 16 },
+  panel: {
+    flex:         1,
+    borderRadius: 12,
+    borderWidth:  1,
+    borderColor:  'transparent',
+    padding:      8,
+  },
+  panelInner: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    gap:           10,
+  },
 
-  arabic: { fontSize: 13, fontWeight: '700' },
-  time:   { fontSize: 14, fontWeight: '900', letterSpacing: 0.2, position: 'absolute', left: 54, top: 18 },
-  cd:     { fontSize: 9,  fontWeight: '700', letterSpacing: 0.3, position: 'absolute', left: 54, bottom: 6 },
-  done:   { fontSize: 10, color: '#1AB87A', fontWeight: '800',   position: 'absolute', left: 54, bottom: 6 },
-  label:  { fontSize: 8,  color: C.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, position: 'absolute', left: 54, top: 6 },
+  ringWrap: {
+    width:          40,
+    height:         40,
+    alignItems:     'center',
+    justifyContent: 'center',
+  },
+  emoji: { position: 'absolute', fontSize: 18 },
+
+  textCol:    { flex: 1, gap: 1 },
+  smallLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 0.8 },
+  arabic:     { fontSize: 13, fontWeight: '700' },
+  time:       { fontSize: 14, fontWeight: '900', letterSpacing: 0.2 },
+  cd:         { fontSize: 10, fontWeight: '700', letterSpacing: 0.4 },
+  done:       { fontSize: 10, fontWeight: '600', color: '#1AB87A' },
 });
