@@ -98,7 +98,11 @@ function Navigation() {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'AmiriQuran': require('./assets/fonts/AmiriQuran-Regular.ttf'),
+    'AmiriQuran':    require('./assets/fonts/AmiriQuran-Regular.ttf'),
+    'KFGQPCNaskh':  require('./assets/fonts/KFGQPC Uthman Taha Naskh Regular.ttf'),
+    'KFGQPCHafs':   require('./assets/fonts/KFGQPC Uthmanic Script HAFS Regular.otf'),
+    'Scheherazade': require('./assets/fonts/Scheherazade Regular.ttf'),
+    'PDMSSaleem':   require('./assets/fonts/_PDMS_Saleem_QuranFont Regular.ttf'),
   });
 
   // Render nothing until the custom font is ready â avoids a flash of
