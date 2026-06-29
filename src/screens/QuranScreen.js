@@ -89,7 +89,7 @@ const SurahRow = React.memo(({ item, onPress, Colors }) => {
 // ── Ayah Item ──────────────────────────────────────────────────────────────────
 const AyahItem = React.memo(({ ayah, showEn, showBn, arabicFont, arabicSize, Colors }) => {
   const styles = ayahStyles(Colors);
-  const fontFamily = arabicFont === 'pdms' ? 'PDMSSaleem' : undefined;
+  const fontFamily = arabicFont === 'amiri' ? 'AmiriQuran' : undefined;
   return (
     <View style={styles.ayahCard}>
       {/* Verse number */}
@@ -144,10 +144,10 @@ export default function QuranScreen() {
   const [search,     setSearch]     = useState('');
   const [showEn,     setShowEn]     = useState(true);
   const [showBn,     setShowBn]     = useState(true);
-  // 'system' = OS default Arabic, 'pdms' = PDMS Saleem Quran Font
+  // 'system' = OS default Arabic, 'amiri' = Amiri Quran Font
   const [arabicFont, setArabicFont] = useState('system');
   const toggleFont = useCallback(() =>
-    setArabicFont(f => f === 'system' ? 'pdms' : 'system'), []);
+    setArabicFont(f => f === 'system' ? 'amiri' : 'system'), []);
 
   // Arabic font size: default 26, range 18–48
   const ARABIC_SIZE_DEFAULT = 26;
@@ -247,12 +247,12 @@ export default function QuranScreen() {
           <Text style={styles.headerSub}>The Holy Quran</Text>
           {/* Font switcher — accessible from list view too */}
           <TouchableOpacity
-            style={[styles.fontToggleBtn, arabicFont === 'pdms' && styles.fontToggleBtnOn]}
+            style={[styles.fontToggleBtn, arabicFont === 'amiri' && styles.fontToggleBtnOn]}
             onPress={toggleFont}
             activeOpacity={0.7}
           >
-            <Text style={[styles.fontToggleBtnText, arabicFont === 'pdms' && styles.fontToggleBtnTextOn]}>
-              {arabicFont === 'pdms' ? '✦ PDMS Font' : '✦ System Font'}
+            <Text style={[styles.fontToggleBtnText, arabicFont === 'amiri' && styles.fontToggleBtnTextOn]}>
+              {arabicFont === 'amiri' ? '✦ Amiri Font' : '✦ System Font'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -349,11 +349,11 @@ export default function QuranScreen() {
             </TouchableOpacity>
             {/* Font switcher */}
             <TouchableOpacity
-              style={[styles.toggleBtn, arabicFont === 'pdms' && styles.toggleBtnOn]}
+              style={[styles.toggleBtn, arabicFont === 'amiri' && styles.toggleBtnOn]}
               onPress={toggleFont}
               activeOpacity={0.7}
             >
-              <Text style={[styles.toggleBtnText, arabicFont === 'pdms' && styles.toggleBtnTextOn]}>
+              <Text style={[styles.toggleBtnText, arabicFont === 'amiri' && styles.toggleBtnTextOn]}>
                 خط
               </Text>
             </TouchableOpacity>
@@ -453,7 +453,7 @@ export default function QuranScreen() {
                     styles.bismillah,
                     { color: Colors.primary },
                     { fontSize: arabicSize + 2, lineHeight: (arabicSize + 2) * 1.7 },
-                    arabicFont === 'pdms' && { fontFamily: 'PDMSSaleem' },
+                    arabicFont === 'amiri' && { fontFamily: 'AmiriQuran' },
                   ]}>
                     {BISMILLAH}
                   </Text>
