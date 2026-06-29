@@ -801,6 +801,7 @@ const ayahStyles = (Colors) => StyleSheet.create({
     paddingBottom:     16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
+    overflow:          'hidden',  // safety net — prevents text bleeding past card edge
   },
   verseNumWrap: {
     flexDirection: 'row',
@@ -831,25 +832,29 @@ const ayahStyles = (Colors) => StyleSheet.create({
 
   // Arabic — large, right-to-left
   arabicText: {
-    color:         Colors.text,
-    fontSize:      26,
-    lineHeight:    46,
-    textAlign:     'right',
+    color:            Colors.text,
+    fontSize:         26,
+    lineHeight:       46,
+    textAlign:        'right',
     writingDirection: 'rtl',
-    fontWeight:    '500',
-    letterSpacing: 0.5,
-    marginBottom:  14,
-    paddingHorizontal: 4,
+    fontWeight:       '500',
+    // NOTE: letterSpacing removed — causes RTL Arabic text to overflow the
+    // right edge of the screen at larger font sizes (spacing is added after
+    // each glyph, pushing the line-start char off-screen in RTL).
+    marginBottom:     14,
+    // NOTE: paddingHorizontal removed — parent ayahCard already has 16px
+    // horizontal padding; adding more here shrinks the wrapping budget and
+    // contributes to overflow.
+    alignSelf:        'stretch',   // fill the full card width
   },
 
   // English
   englishText: {
-    color:      Colors.textSecondary,
-    fontSize:   14,
-    lineHeight: 22,
-    fontStyle:  'italic',
+    color:        Colors.textSecondary,
+    fontSize:     14,
+    lineHeight:   22,
+    fontStyle:    'italic',
     marginBottom: 8,
-    paddingHorizontal: 4,
   },
 
   // Bangla
@@ -858,6 +863,5 @@ const ayahStyles = (Colors) => StyleSheet.create({
     fontSize:   14,
     lineHeight: 24,
     fontWeight: '400',
-    paddingHorizontal: 4,
   },
 });
