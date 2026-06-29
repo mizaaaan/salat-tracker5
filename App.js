@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
+import { useFonts } from 'expo-font';
 
 import HomeScreen    from './src/screens/HomeScreen';
 import QiblaScreen   from './src/screens/QiblaScreen';
@@ -96,6 +97,14 @@ function Navigation() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'PDMSSaleem': require('./assets/fonts/PDMSSaleem.ttf'),
+  });
+
+  // Render nothing until the custom font is ready — avoids a flash of
+  // unstyled text on the very first frame.
+  if (!fontsLoaded) return null;
+
   return (
     <SafeAreaProvider>
       <ThemeProvider>
