@@ -613,7 +613,7 @@ const getStyles = (Colors) => StyleSheet.create({
     flexDirection:  'row',
     alignItems:     'center',
     justifyContent: 'center',
-    gap:            12,
+    gap:            8,
     paddingTop:     2,
   },
   sizeBtn: {
@@ -642,7 +642,7 @@ const getStyles = (Colors) => StyleSheet.create({
     color:      Colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 0.3,
-    minWidth:   100,
+    minWidth:   22,
     textAlign:  'center',
   },
   backBtn: {
