@@ -23,6 +23,7 @@ import { TRACKABLE_PRAYERS } from '../utils/prayerTimes';
 import TasbihScreen         from './TasbihScreen';
 import IslamicCalendarScreen from './IslamicCalendarScreen';
 import HajjUmrahScreen       from './HajjUmrahScreen';
+import AsmaulHusnaScreen     from './AsmaulHusnaScreen';
 
 // ── Quotes ────────────────────────────────────────────────────────────────────
 const QUOTES = [
@@ -117,6 +118,7 @@ export default function ToolsScreen() {
   const [tasbihOpen,   setTasbihOpen]   = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [hajjOpen,     setHajjOpen]     = useState(false);
+  const [namesOpen,    setNamesOpen]    = useState(false);
 
   // Load data when tab gains focus
   const loadData = useCallback(async () => {
@@ -236,6 +238,13 @@ export default function ToolsScreen() {
             sub="Complete step-by-step guide with du'as"
             color="#A06BE0"
             onPress={() => setHajjOpen(true)}
+            styles={styles}
+          />
+          <ToolRow
+            icon="✨" title="99 Names of Allah"
+            sub="Asma-ul-Husna with English & Bengali meaning"
+            color="#C9A84C"
+            onPress={() => setNamesOpen(true)}
             isLast
             styles={styles}
           />
@@ -283,6 +292,7 @@ export default function ToolsScreen() {
       <TasbihScreen          visible={tasbihOpen}   onClose={() => setTasbihOpen(false)}   />
       <IslamicCalendarScreen visible={calendarOpen} onClose={() => setCalendarOpen(false)} />
       <HajjUmrahScreen       visible={hajjOpen}     onClose={() => setHajjOpen(false)}     />
+      <AsmaulHusnaScreen     visible={namesOpen}    onClose={() => setNamesOpen(false)}    />
     </SafeAreaView>
   );
 }
