@@ -387,7 +387,7 @@ export default function QuranScreen() {
           </TouchableOpacity>
 
           <Text style={styles.sizeLabel}>
-            Arabic size · {arabicSize}
+            {arabicSize}
           </Text>
 
           <TouchableOpacity
