@@ -11,9 +11,9 @@ const ARABIC = {
 
 // Durud / Salawat texts — rotated for a little variety
 const DURUD_MESSAGES = [
-  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ — Send Salawat upon the Prophet ﷺ' },
-  { title: '🌿 Durud Reminder', body: 'O Allah, send blessings upon Muhammad ﷺ and his family.' },
-  { title: '🌿 Durud Reminder', body: 'A moment to recite Durud Sharif — earn immense reward 🤲' },
+  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ ﷺ' },
+  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَىٰ سَیِّدِنَا مُحَمَّدٍ ﷺ' },
+  { title: '🌿 Durud Reminder', body: 'صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ' },
 ];
 
 /** Request permission to show notifications. Returns true if granted. */
@@ -105,4 +105,3 @@ export const scheduleDurudReminder = async (intervalHours = 1) => {
 export const cancelDurudReminder = async () => {
   await cancelByType('durud');
 };
-
