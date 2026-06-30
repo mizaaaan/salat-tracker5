@@ -11,9 +11,9 @@ const ARABIC = {
 
 // Durud / Salawat texts — rotated for a little variety
 const DURUD_MESSAGES = [
-  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ ﷺ' },
-  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَىٰ سَیِّدِنَا مُحَمَّدٍ ﷺ' },
   { title: '🌿 Durud Reminder', body: 'صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ' },
+  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ ﷺ' },
+  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَىٰ سَیِّدِنَا مُحَمَّدٍ ﷺ' },
 ];
 
 /** Request permission to show notifications. Returns true if granted. */
@@ -79,13 +79,21 @@ export const cancelAllNotifications = async () => {
 };
 
 /**
- * Schedule a repeating Durud / Salawat reminder every `intervalHours` hours.
+ * Schedule a true, infinitely-repeating Durud / Salawat reminder every
+ * `intervalHours` hours, using the OS's native repeat trigger.
+ *
+ * NOTE: a native repeating notification is locked to ONE fixed message —
+ * the OS fires it forever without the app ever needing to be reopened.
+ * Rotating between multiple messages would require rescheduling on each
+ * firing, which only happens while the app is open — so to guarantee the
+ * reminder keeps firing even if the app is never reopened, we use just the
+ * first message here.
  * Cancels any previously scheduled Durud reminder first.
  */
 export const scheduleDurudReminder = async (intervalHours = 1) => {
   await cancelByType('durud');
 
-  const msg = DURUD_MESSAGES[Math.floor(Math.random() * DURUD_MESSAGES.length)];
+  const msg = DURUD_MESSAGES[0];
 
   await Notifications.scheduleNotificationAsync({
     content: {
