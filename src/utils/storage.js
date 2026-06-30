@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const PRAYERS_PREFIX       = 'prayers_';
 const COMPLETE_DAYS_KEY    = 'complete_days';
 const NOTIFICATIONS_KEY    = 'notifications_enabled';
+const DURUD_ENABLED_KEY    = 'durud_notifications_enabled';
+const DURUD_INTERVAL_KEY   = 'durud_notifications_interval_hours';
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
 
@@ -138,6 +140,46 @@ export const getNotificationsEnabled = async () => {
 export const setNotificationsEnabled = async (enabled) => {
   try {
     await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(enabled));
+  } catch {
+    // ignore
+  }
+};
+
+// ─── Durud (Salawat) reminder preference ──────────────────────────────────────
+
+/** Returns true if the Durud reminder is enabled (default: false). */
+export const getDurudEnabled = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(DURUD_ENABLED_KEY);
+    return raw === null ? false : JSON.parse(raw);
+  } catch {
+    return false;
+  }
+};
+
+/** Persists the user's Durud reminder on/off preference. */
+export const setDurudEnabled = async (enabled) => {
+  try {
+    await AsyncStorage.setItem(DURUD_ENABLED_KEY, JSON.stringify(enabled));
+  } catch {
+    // ignore
+  }
+};
+
+/** Returns the Durud reminder interval in hours, 1–12 (default: 1). */
+export const getDurudIntervalHours = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(DURUD_INTERVAL_KEY);
+    return raw === null ? 1 : JSON.parse(raw);
+  } catch {
+    return 1;
+  }
+};
+
+/** Persists the user's Durud reminder interval in hours (1–12). */
+export const setDurudIntervalHours = async (hours) => {
+  try {
+    await AsyncStorage.setItem(DURUD_INTERVAL_KEY, JSON.stringify(hours));
   } catch {
     // ignore
   }
