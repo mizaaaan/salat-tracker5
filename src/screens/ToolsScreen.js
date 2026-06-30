@@ -5,7 +5,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet,
-  ActivityIndicator, Switch, TouchableOpacity,
+  ActivityIndicator, Switch, TouchableOpacity, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -15,8 +15,14 @@ import {
   getStreakData, getWeeklyData,
   getCompletedPrayers,
   getNotificationsEnabled, setNotificationsEnabled,
+  getDurudEnabled, setDurudEnabled,
+  getDurudIntervalHours, setDurudIntervalHours,
 } from '../utils/storage';
-import { cancelAllNotifications } from '../utils/notifications';
+import {
+  cancelAllNotifications,
+  requestNotificationPermission,
+  scheduleDurudReminder, cancelDurudReminder,
+} from '../utils/notifications';
 import { TRACKABLE_PRAYERS } from '../utils/prayerTimes';
 
 // ── Feature screens (modal) ────────────────────────────────────────────────────
@@ -109,6 +115,9 @@ export default function ToolsScreen() {
   const [todayPrayers, setTodayPrayers] = useState([]);
   // Settings state
   const [notifEnabled, setNotifEnabled] = useState(true);
+  const [durudEnabled, setDurudEnabledState] = useState(false);
+  const [durudInterval, setDurudIntervalState] = useState(1);
+  const [intervalPickerOpen, setIntervalPickerOpen] = useState(false);
   // Loading
   const [loading, setLoading] = useState(true);
   // Quote
@@ -124,16 +133,20 @@ export default function ToolsScreen() {
   const loadData = useCallback(async () => {
     setLoading(true);
     const todayKey = new Date().toISOString().split('T')[0];
-    const [s, w, todayDone, notif] = await Promise.all([
+    const [s, w, todayDone, notif, durudOn, durudHrs] = await Promise.all([
       getStreakData(),
       getWeeklyData(),
       getCompletedPrayers(todayKey),
       getNotificationsEnabled(),
+      getDurudEnabled(),
+      getDurudIntervalHours(),
     ]);
     setStreak(s);
     setWeekly(w);
     setTodayPrayers(todayDone);
     setNotifEnabled(notif);
+    setDurudEnabledState(durudOn);
+    setDurudIntervalState(durudHrs);
     setLoading(false);
   }, []);
 
@@ -143,6 +156,31 @@ export default function ToolsScreen() {
     setNotifEnabled(value);
     await setNotificationsEnabled(value);
     if (!value) await cancelAllNotifications();
+  };
+
+  const handleDurudToggle = async (value) => {
+    setDurudEnabledState(value);
+    await setDurudEnabled(value);
+    if (value) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await scheduleDurudReminder(durudInterval);
+      } else {
+        setDurudEnabledState(false);
+        await setDurudEnabled(false);
+      }
+    } else {
+      await cancelDurudReminder();
+    }
+  };
+
+  const handleSelectInterval = async (hours) => {
+    setDurudIntervalState(hours);
+    await setDurudIntervalHours(hours);
+    setIntervalPickerOpen(false);
+    if (durudEnabled) {
+      await scheduleDurudReminder(hours);
+    }
   };
 
   const todayDoneCount = TRACKABLE_PRAYERS.filter(p => todayPrayers.includes(p)).length;
@@ -271,6 +309,44 @@ export default function ToolsScreen() {
 
           <HR styles={styles} />
 
+          <View style={styles.settingRow}>
+            <View style={styles.settingMeta}>
+              <Text style={styles.settingLabel}>Durud Reminder</Text>
+              <Text style={styles.settingHint}>
+                {durudEnabled
+                  ? `Reminding you to recite Durud every ${durudInterval} ${durudInterval === 1 ? 'hour' : 'hours'}`
+                  : 'Get gentle reminders to recite Durud Sharif'}
+              </Text>
+            </View>
+            <Switch
+              value={durudEnabled}
+              onValueChange={handleDurudToggle}
+              trackColor={{ false: Colors.border, true: Colors.primary }}
+              thumbColor={durudEnabled ? Colors.primaryLight : Colors.textSecondary}
+            />
+          </View>
+
+          {durudEnabled && (
+            <>
+              <HR styles={styles} />
+              <TouchableOpacity
+                style={styles.infoRow}
+                onPress={() => setIntervalPickerOpen(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.settingLabel}>Reminder Interval</Text>
+                <View style={styles.intervalValueBox}>
+                  <Text style={styles.infoValue}>
+                    Every {durudInterval} {durudInterval === 1 ? 'hour' : 'hours'}
+                  </Text>
+                  <Text style={styles.intervalChevron}>›</Text>
+                </View>
+              </TouchableOpacity>
+            </>
+          )}
+
+          <HR styles={styles} />
+
           {[
             { label: 'Calculation Method', value: 'Karachi' },
             { label: 'App Version',        value: '1.0.0'   },
@@ -293,6 +369,47 @@ export default function ToolsScreen() {
       <IslamicCalendarScreen visible={calendarOpen} onClose={() => setCalendarOpen(false)} />
       <HajjUmrahScreen       visible={hajjOpen}     onClose={() => setHajjOpen(false)}     />
       <AsmaulHusnaScreen     visible={namesOpen}    onClose={() => setNamesOpen(false)}    />
+
+      {/* ── Durud interval picker ── */}
+      <Modal
+        visible={intervalPickerOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIntervalPickerOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.pickerOverlay}
+          activeOpacity={1}
+          onPress={() => setIntervalPickerOpen(false)}
+        >
+          <View style={styles.pickerSheet} onStartShouldSetResponder={() => true}>
+            <Text style={styles.pickerTitle}>Durud Reminder Interval</Text>
+            <Text style={styles.pickerSub}>Choose how often you'd like to be reminded</Text>
+
+            <View style={styles.pickerGrid}>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((hr) => {
+                const active = hr === durudInterval;
+                return (
+                  <TouchableOpacity
+                    key={hr}
+                    style={[styles.pickerChip, active && styles.pickerChipActive]}
+                    onPress={() => handleSelectInterval(hr)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={[styles.pickerChipText, active && styles.pickerChipTextActive]}>
+                      {hr}{hr === 1 ? ' hr' : ' hrs'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity style={styles.pickerCloseBtn} onPress={() => setIntervalPickerOpen(false)}>
+              <Text style={styles.pickerCloseText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -370,4 +487,21 @@ const getStyles = (Colors) => StyleSheet.create({
   settingHint: { fontSize: 12, color: Colors.textSecondary, marginTop: 3, lineHeight: 17 },
   infoRow:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   infoValue:   { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
+
+  // Durud interval row
+  intervalValueBox: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  intervalChevron:  { fontSize: 16, color: Colors.textMuted, fontWeight: '700' },
+
+  // Durud interval picker modal
+  pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
+  pickerSheet:   { backgroundColor: Colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 36, borderWidth: 1, borderColor: Colors.border, borderBottomWidth: 0 },
+  pickerTitle:   { fontSize: 17, fontWeight: '700', color: Colors.text, textAlign: 'center' },
+  pickerSub:     { fontSize: 12, color: Colors.textSecondary, textAlign: 'center', marginTop: 4, marginBottom: 18 },
+  pickerGrid:    { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
+  pickerChip:        { width: '22%', paddingVertical: 12, borderRadius: 14, backgroundColor: Colors.cardLight, borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center' },
+  pickerChipActive:  { backgroundColor: Colors.primary + '22', borderColor: Colors.primary },
+  pickerChipText:       { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
+  pickerChipTextActive: { color: Colors.primary, fontWeight: '800' },
+  pickerCloseBtn:  { marginTop: 20, backgroundColor: Colors.primary, borderRadius: 16, paddingVertical: 13, alignItems: 'center' },
+  pickerCloseText: { fontSize: 15, fontWeight: '700', color: Colors.background },
 });
