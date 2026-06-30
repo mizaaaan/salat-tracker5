@@ -42,6 +42,15 @@ const stripBismillah = (text) => {
   return words.length > 4 ? words.slice(4).join(' ') : t;
 };
 
+// ── Font options ───────────────────────────────────────────────────────────────
+const FONT_OPTIONS = [
+  { key: 'system',   label: 'System',  fontFamily: undefined },
+  { key: 'amiri',    label: 'Amiri',   fontFamily: 'AmiriQuran' },
+  { key: 'volt',     label: 'Volt',    fontFamily: 'MeQuranVolt' },
+  { key: 'qpchafs',  label: 'QPC Hafs',fontFamily: 'QPCHafs' },
+  { key: 'hafsv22',  label: 'Hafs V22',fontFamily: 'UthmanicHafsV22' },
+];
+
 // ── API ────────────────────────────────────────────────────────────────────────
 const BASE = 'https://api.alquran.cloud/v1';
 
@@ -89,7 +98,7 @@ const SurahRow = React.memo(({ item, onPress, Colors }) => {
 // ── Ayah Item ──────────────────────────────────────────────────────────────────
 const AyahItem = React.memo(({ ayah, showEn, showBn, arabicFont, arabicSize, Colors }) => {
   const styles = ayahStyles(Colors);
-  const fontFamily = arabicFont === 'amiri' ? 'AmiriQuran' : undefined;
+  const fontFamily = FONT_OPTIONS.find(f => f.key === arabicFont)?.fontFamily;
   return (
     <View style={styles.ayahCard}>
       {/* Verse number */}
@@ -144,10 +153,14 @@ export default function QuranScreen() {
   const [search,     setSearch]     = useState('');
   const [showEn,     setShowEn]     = useState(true);
   const [showBn,     setShowBn]     = useState(true);
-  // 'system' = OS default Arabic, 'amiri' = Amiri Quran Font
+  // cycles through FONT_OPTIONS: system, amiri, volt, qpchafs, hafsv22
   const [arabicFont, setArabicFont] = useState('system');
   const toggleFont = useCallback(() =>
-    setArabicFont(f => f === 'system' ? 'amiri' : 'system'), []);
+    setArabicFont(f => {
+      const idx = FONT_OPTIONS.findIndex(o => o.key === f);
+      return FONT_OPTIONS[(idx + 1) % FONT_OPTIONS.length].key;
+    }), []);
+  const currentFontLabel = FONT_OPTIONS.find(o => o.key === arabicFont)?.label ?? 'System';
 
   // Arabic font size: default 26, range 18–48
   const ARABIC_SIZE_DEFAULT = 26;
@@ -247,12 +260,12 @@ export default function QuranScreen() {
           <Text style={styles.headerSub}>The Holy Quran</Text>
           {/* Font switcher — accessible from list view too */}
           <TouchableOpacity
-            style={[styles.fontToggleBtn, arabicFont === 'amiri' && styles.fontToggleBtnOn]}
+            style={[styles.fontToggleBtn, arabicFont !== 'system' && styles.fontToggleBtnOn]}
             onPress={toggleFont}
             activeOpacity={0.7}
           >
-            <Text style={[styles.fontToggleBtnText, arabicFont === 'amiri' && styles.fontToggleBtnTextOn]}>
-              {arabicFont === 'amiri' ? '✦ Amiri Font' : '✦ System Font'}
+            <Text style={[styles.fontToggleBtnText, arabicFont !== 'system' && styles.fontToggleBtnTextOn]}>
+              ✦ Font: {currentFontLabel}
             </Text>
           </TouchableOpacity>
         </View>
@@ -349,11 +362,11 @@ export default function QuranScreen() {
             </TouchableOpacity>
             {/* Font switcher */}
             <TouchableOpacity
-              style={[styles.toggleBtn, arabicFont === 'amiri' && styles.toggleBtnOn]}
+              style={[styles.toggleBtn, arabicFont !== 'system' && styles.toggleBtnOn]}
               onPress={toggleFont}
               activeOpacity={0.7}
             >
-              <Text style={[styles.toggleBtnText, arabicFont === 'amiri' && styles.toggleBtnTextOn]}>
+              <Text style={[styles.toggleBtnText, arabicFont !== 'system' && styles.toggleBtnTextOn]}>
                 خط
               </Text>
             </TouchableOpacity>
@@ -453,7 +466,9 @@ export default function QuranScreen() {
                     styles.bismillah,
                     { color: Colors.primary },
                     { fontSize: arabicSize + 2, lineHeight: (arabicSize + 2) * 1.7 },
-                    arabicFont === 'amiri' && { fontFamily: 'AmiriQuran' },
+                    FONT_OPTIONS.find(o => o.key === arabicFont)?.fontFamily
+                      ? { fontFamily: FONT_OPTIONS.find(o => o.key === arabicFont).fontFamily }
+                      : null,
                   ]}>
                     {BISMILLAH}
                   </Text>
