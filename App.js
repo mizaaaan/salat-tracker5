@@ -64,7 +64,7 @@ function Navigation() {
             shadowOpacity:   0.06,
             shadowRadius:    6,
             elevation:       8,
-            // Removed position:'absolute' â it caused the tab bar to float
+            // Removed position:'absolute' Ã¢ÂÂ it caused the tab bar to float
             // over screen content. React Navigation could not reserve space
             // for it, so the last ~88px of every scroll screen was hidden
             // behind the tab bar (icons still visible, text cut off).
@@ -99,9 +99,12 @@ function Navigation() {
 export default function App() {
   const [fontsLoaded] = useFonts({
     'AmiriQuran': require('./assets/fonts/AmiriQuran-Regular.ttf'),
+    'MeQuranVolt': require('./assets/fonts/me_quran_volt_newmet.ttf'),
+    'QPCHafs': require('./assets/fonts/QPC_Hafs_font.ttf'),
+    'UthmanicHafsV22': require('./assets/fonts/UthmanicHafs_V22.ttf'),
   });
 
-  // Render nothing until the custom font is ready â avoids a flash of
+  // Render nothing until the custom font is ready Ã¢ÂÂ avoids a flash of
   // unstyled text on the very first frame.
   if (!fontsLoaded) return null;
 
