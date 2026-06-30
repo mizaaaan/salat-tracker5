@@ -9,6 +9,13 @@ const ARABIC = {
   Isha:    'العشاء',
 };
 
+// Durud / Salawat texts — rotated for a little variety
+const DURUD_MESSAGES = [
+  { title: '🌿 Durud Reminder', body: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ — Send Salawat upon the Prophet ﷺ' },
+  { title: '🌿 Durud Reminder', body: 'O Allah, send blessings upon Muhammad ﷺ and his family.' },
+  { title: '🌿 Durud Reminder', body: 'A moment to recite Durud Sharif — earn immense reward 🤲' },
+];
+
 /** Request permission to show notifications. Returns true if granted. */
 export const requestNotificationPermission = async () => {
   if (!Device.isDevice) return false; // Skip on simulator
@@ -20,13 +27,26 @@ export const requestNotificationPermission = async () => {
   return status === 'granted';
 };
 
+/** Cancel only notifications scheduled with the given data.type tag. */
+const cancelByType = async (type) => {
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const toCancel = scheduled.filter(n => n.content?.data?.type === type);
+    await Promise.all(
+      toCancel.map(n => Notifications.cancelScheduledNotificationAsync(n.identifier))
+    );
+  } catch {
+    // ignore
+  }
+};
+
 /**
  * Schedule local notifications for all 5 trackable prayers for today.
- * Cancels any previously scheduled prayer notifications first.
+ * Cancels any previously scheduled *prayer* notifications first
+ * (leaves Durud reminders untouched).
  */
 export const schedulePrayerNotifications = async (prayerTimes) => {
-  // Cancel old scheduled notifications to avoid duplicates
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  await cancelByType('prayer');
 
   const trackable = {
     Fajr:    prayerTimes.Fajr,
@@ -46,14 +66,43 @@ export const schedulePrayerNotifications = async (prayerTimes) => {
         title: `🕌 ${name} — ${ARABIC[name]}`,
         body:  `It's time for ${name} prayer. Allahu Akbar! 🤲`,
         sound: true,
-        data:  { prayer: name },
+        data:  { type: 'prayer', prayer: name },
       },
       trigger: { date: time },
     });
   }
 };
 
-/** Cancel all scheduled prayer notifications. */
+/** Cancel all scheduled prayer notifications (Durud reminders are untouched). */
 export const cancelAllNotifications = async () => {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  await cancelByType('prayer');
 };
+
+/**
+ * Schedule a repeating Durud / Salawat reminder every `intervalHours` hours.
+ * Cancels any previously scheduled Durud reminder first.
+ */
+export const scheduleDurudReminder = async (intervalHours = 1) => {
+  await cancelByType('durud');
+
+  const msg = DURUD_MESSAGES[Math.floor(Math.random() * DURUD_MESSAGES.length)];
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: msg.title,
+      body:  msg.body,
+      sound: true,
+      data:  { type: 'durud' },
+    },
+    trigger: {
+      seconds:  Math.max(1, Math.round(intervalHours * 3600)),
+      repeats:  true,
+    },
+  });
+};
+
+/** Cancel only the scheduled Durud reminder (prayer notifications are untouched). */
+export const cancelDurudReminder = async () => {
+  await cancelByType('durud');
+};
+
