@@ -341,9 +341,32 @@ export default function QuranScreen() {
             <Text style={styles.backText}>Surahs</Text>
           </TouchableOpacity>
 
-          <View style={styles.surahTitleBlock}>
-            <Text style={styles.surahArabicTitle}>{selected?.name}</Text>
-            <Text style={styles.surahLatinTitle}>{selected?.englishName}</Text>
+          <View style={styles.sizeRow}>
+            <TouchableOpacity
+              style={[styles.sizeBtn, arabicSize <= ARABIC_SIZE_MIN && styles.sizeBtnDisabled]}
+              onPress={sizeDown}
+              disabled={arabicSize <= ARABIC_SIZE_MIN}
+              hitSlop={{ top:8, bottom:8, left:8, right:8 }}
+            >
+              <Text style={[styles.sizeBtnText, arabicSize <= ARABIC_SIZE_MIN && styles.sizeBtnTextDisabled]}>
+                A−
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.sizeLabel}>
+              {arabicSize}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.sizeBtn, arabicSize >= ARABIC_SIZE_MAX && styles.sizeBtnDisabled]}
+              onPress={sizeUp}
+              disabled={arabicSize >= ARABIC_SIZE_MAX}
+              hitSlop={{ top:8, bottom:8, left:8, right:8 }}
+            >
+              <Text style={[styles.sizeBtnText, arabicSize >= ARABIC_SIZE_MAX && styles.sizeBtnTextDisabled]}>
+                A+
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Translation toggles + font switcher */}
@@ -373,33 +396,10 @@ export default function QuranScreen() {
           </View>
         </View>
 
-        {/* Row 2: font-size control */}
-        <View style={styles.sizeRow}>
-          <TouchableOpacity
-            style={[styles.sizeBtn, arabicSize <= ARABIC_SIZE_MIN && styles.sizeBtnDisabled]}
-            onPress={sizeDown}
-            disabled={arabicSize <= ARABIC_SIZE_MIN}
-            hitSlop={{ top:8, bottom:8, left:8, right:8 }}
-          >
-            <Text style={[styles.sizeBtnText, arabicSize <= ARABIC_SIZE_MIN && styles.sizeBtnTextDisabled]}>
-              A−
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.sizeLabel}>
-            {arabicSize}
-          </Text>
-
-          <TouchableOpacity
-            style={[styles.sizeBtn, arabicSize >= ARABIC_SIZE_MAX && styles.sizeBtnDisabled]}
-            onPress={sizeUp}
-            disabled={arabicSize >= ARABIC_SIZE_MAX}
-            hitSlop={{ top:8, bottom:8, left:8, right:8 }}
-          >
-            <Text style={[styles.sizeBtnText, arabicSize >= ARABIC_SIZE_MAX && styles.sizeBtnTextDisabled]}>
-              A+
-            </Text>
-          </TouchableOpacity>
+        {/* Row 2: surah title */}
+        <View style={styles.surahTitleBlock}>
+          <Text style={styles.surahArabicTitle}>{selected?.name}</Text>
+          <Text style={styles.surahLatinTitle}>{selected?.englishName}</Text>
         </View>
       </View>
 
@@ -610,6 +610,7 @@ const getStyles = (Colors) => StyleSheet.create({
 
   // Font-size control row
   sizeRow: {
+    flex:           1,
     flexDirection:  'row',
     alignItems:     'center',
     justifyContent: 'center',
@@ -662,8 +663,8 @@ const getStyles = (Colors) => StyleSheet.create({
     fontWeight: '600',
   },
   surahTitleBlock: {
-    flex:      1,
     alignItems:'center',
+    paddingTop: 6,
   },
   surahArabicTitle: {
     fontSize:   20,
