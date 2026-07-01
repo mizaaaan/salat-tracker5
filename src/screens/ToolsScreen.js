@@ -21,6 +21,7 @@ import {
 import {
   cancelAllNotifications,
   requestNotificationPermission,
+  refreshPrayerNotifications,
   scheduleDurudReminder, cancelDurudReminder,
 } from '../utils/notifications';
 import { TRACKABLE_PRAYERS } from '../utils/prayerTimes';
@@ -155,7 +156,17 @@ export default function ToolsScreen() {
   const handleNotifToggle = async (value) => {
     setNotifEnabled(value);
     await setNotificationsEnabled(value);
-    if (!value) await cancelAllNotifications();
+    if (value) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await refreshPrayerNotifications();
+      } else {
+        setNotifEnabled(false);
+        await setNotificationsEnabled(false);
+      }
+    } else {
+      await cancelAllNotifications();
+    }
   };
 
   const handleDurudToggle = async (value) => {

@@ -1,5 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import * as Location from 'expo-location';
+import { calculatePrayerTimes } from './prayerTimes';
 
 const ARABIC = {
   Fajr:    'الفجر',
@@ -40,36 +42,70 @@ const cancelByType = async (type) => {
   }
 };
 
+// iOS caps a single app at 64 pending local notifications. We reserve a
+// couple slots for the Durud reminder and stay comfortably under that limit.
+const SCHEDULE_DAYS_AHEAD = 10; // 5 prayers × 10 days = 50 notifications
+
 /**
- * Schedule local notifications for all 5 trackable prayers for today.
+ * Schedule local notifications for all 5 trackable prayers across the next
+ * `SCHEDULE_DAYS_AHEAD` days (starting today), computed from a single
+ * lat/lng. This is what lets reminders keep firing for ~10 days even if the
+ * app isn't reopened in between.
  * Cancels any previously scheduled *prayer* notifications first
  * (leaves Durud reminders untouched).
  */
-export const schedulePrayerNotifications = async (prayerTimes) => {
+export const schedulePrayerNotifications = async (latitude, longitude) => {
   await cancelByType('prayer');
-
-  const trackable = {
-    Fajr:    prayerTimes.Fajr,
-    Dhuhr:   prayerTimes.Dhuhr,
-    Asr:     prayerTimes.Asr,
-    Maghrib: prayerTimes.Maghrib,
-    Isha:    prayerTimes.Isha,
-  };
 
   const now = new Date();
 
-  for (const [name, time] of Object.entries(trackable)) {
-    if (!time || time <= now) continue; // Skip past prayers
+  for (let dayOffset = 0; dayOffset < SCHEDULE_DAYS_AHEAD; dayOffset++) {
+    const date = new Date();
+    date.setDate(date.getDate() + dayOffset);
+    const times = calculatePrayerTimes(latitude, longitude, date);
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `🕌 ${name} — ${ARABIC[name]}`,
-        body:  `It's time for ${name} prayer. Allahu Akbar! 🤲`,
-        sound: true,
-        data:  { type: 'prayer', prayer: name },
-      },
-      trigger: { date: time },
-    });
+    const trackable = {
+      Fajr:    times.Fajr,
+      Dhuhr:   times.Dhuhr,
+      Asr:     times.Asr,
+      Maghrib: times.Maghrib,
+      Isha:    times.Isha,
+    };
+
+    for (const [name, time] of Object.entries(trackable)) {
+      if (!time || time <= now) continue; // Skip past prayers
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `🕌 ${name} — ${ARABIC[name]}`,
+          body:  `It's time for ${name} prayer. Allahu Akbar! 🤲`,
+          sound: true,
+          data:  { type: 'prayer', prayer: name },
+        },
+        trigger: { date: time },
+      });
+    }
+  }
+};
+
+/**
+ * Fetches the current location and (re)schedules all upcoming prayer
+ * notifications for the next `SCHEDULE_DAYS_AHEAD` days.
+ * Use this any time notification settings change outside of the Home
+ * screen (e.g. toggling the setting on from Settings), or from the
+ * background task, so reminders keep extending automatically.
+ * Returns true on success, false if permission/location could not be obtained.
+ */
+export const refreshPrayerNotifications = async () => {
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') return false;
+
+    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+    await schedulePrayerNotifications(loc.coords.latitude, loc.coords.longitude);
+    return true;
+  } catch {
+    return false;
   }
 };
 

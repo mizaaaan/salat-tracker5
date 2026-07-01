@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
 import * as Location from 'expo-location';
 
 import { useTheme } from '../constants/ThemeContext';
@@ -122,7 +123,9 @@ export default function HomeScreen() {
       const notificationsOn = await getNotificationsEnabled();
       if (notificationsOn) {
         const granted = await requestNotificationPermission();
-        if (granted) await schedulePrayerNotifications(times);
+        if (granted) {
+          await schedulePrayerNotifications(loc.coords.latitude, loc.coords.longitude);
+        }
       }
 
       const completed = await getCompletedPrayers();
@@ -135,6 +138,25 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Lightweight refresh of the prayer-notification schedule whenever the Home
+  // tab regains focus (without disturbing the loading UI or refetching location).
+  // Combined with the background task, this is what keeps notifications
+  // extending automatically — every revisit (or background run) re-covers
+  // the next ~10 days.
+  useFocusEffect(useCallback(() => {
+    const silentRefresh = async () => {
+      if (!coordsRef.current) return; // Initial load() hasn't finished yet — it will handle scheduling
+      const notificationsOn = await getNotificationsEnabled();
+      if (!notificationsOn) return;
+      const granted = await requestNotificationPermission();
+      if (!granted) return;
+
+      const { latitude, longitude } = coordsRef.current;
+      await schedulePrayerNotifications(latitude, longitude);
+    };
+    silentRefresh();
+  }, []));
 
   // ── Live countdown ticker ──────────────────────────────────────────────────
   useEffect(() => {
