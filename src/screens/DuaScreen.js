@@ -158,6 +158,7 @@ export default function DuaScreen() {
             source={require('../../assets/dua.png')}
             style={styles.headerImage}
             resizeMode="contain"
+            tintColor={Colors.primary}
           />
           <Text style={styles.headerTitle}>দোয়া ও যিকর</Text>
           <Text style={styles.headerSubtitle}>Dua & Azkar Collection</Text>
